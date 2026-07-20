@@ -46,9 +46,8 @@ export async function getBestAvailableModel(req: Request) {
     if (!clientGithubKey && process.env.GITHUB_TOKEN) clientGithubKey = process.env.GITHUB_TOKEN
   }
 
-  // 3. Fallback routing logic
   if (clientOpenAiKey) {
-    const openai = createOpenAI({ apiKey: clientOpenAiKey, compatibility: 'strict' })
+    const openai = createOpenAI({ apiKey: clientOpenAiKey })
     return { model: openai('gpt-4o'), provider: 'openai' }
   }
 

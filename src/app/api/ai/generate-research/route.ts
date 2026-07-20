@@ -39,7 +39,7 @@ Be extremely detailed, objective, and analytical.`
       temperature: 0.5,
     })
 
-    return result.toDataStreamResponse()
+    return result.toTextStreamResponse()
   } catch (error: any) {
     console.error('Error generating research:', error)
     return NextResponse.json(

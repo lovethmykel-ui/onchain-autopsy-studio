@@ -32,7 +32,7 @@ Make it captivating, well-researched, and perfectly paced for a $1,000,000 produ
       temperature: 0.7,
     })
 
-    return result.toDataStreamResponse()
+    return result.toTextStreamResponse()
   } catch (error: any) {
     console.error('Error generating script:', error)
     return NextResponse.json(
