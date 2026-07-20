@@ -4,34 +4,36 @@ import React from 'react'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
 import PageTransition from '@/components/layout/PageTransition'
+import ProductionPipeline from '@/components/dashboard/ProductionPipeline'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { useUIStore } from '@/lib/store/ui'
-import { cn } from '@/lib/utils'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { sidebarCollapsed } = useUIStore()
-
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="min-h-screen bg-background">
-        <Sidebar />
-        <TopBar />
-        <main 
-          className={cn(
-            "pt-16 min-h-screen transition-all duration-300 ease-in-out",
-            sidebarCollapsed ? "ml-[64px]" : "ml-[200px]"
-          )}
+      <div className="min-h-screen bg-[#080B11] text-text-primary font-body antialiased">
+        {/* Strict 3-Panel Layout Grid */}
+        <div className="grid min-h-screen max-w-[1680px] mx-auto 
+          grid-cols-[1fr] md:grid-cols-[220px_1fr] xl:grid-cols-[220px_1fr_240px] 
+          grid-rows-[60px_1fr] 
+          [grid-template-areas:'topbar'_'main'] md:[grid-template-areas:'sidebar_topbar'_'sidebar_main'] xl:[grid-template-areas:'sidebar_topbar_topbar'_'sidebar_main_rightpanel']"
         >
-          <div className="p-6">
+          <Sidebar />
+          <TopBar />
+          
+          <main className="[grid-area:main] overflow-y-auto bg-[#080B11]">
             <PageTransition>
               {children}
             </PageTransition>
-          </div>
-        </main>
+          </main>
+          
+          <aside className="hidden xl:block [grid-area:rightpanel] bg-[#0E131F] border-l border-[#1E2638] p-4 overflow-y-auto">
+             <ProductionPipeline />
+          </aside>
+        </div>
       </div>
     </TooltipProvider>
   )
