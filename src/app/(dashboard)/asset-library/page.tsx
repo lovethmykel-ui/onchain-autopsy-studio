@@ -31,13 +31,18 @@ const gradients = [
   'linear-gradient(135deg, #0a1a1a 0%, #1a3e3e 100%)',
 ]
 
+import { useEffect } from 'react'
+import { useProjectStore } from '@/lib/store/project'
+import { useAssetStore } from '@/lib/store/asset'
+import { formatDistanceToNow } from 'date-fns'
+
 const tabs = [
-  { id: 'images', label: 'Images', icon: Image, count: 2451 },
-  { id: 'videos', label: 'Videos', icon: Film, count: 1248 },
-  { id: 'voices', label: 'Voices', icon: Mic, count: 342 },
-  { id: 'music', label: 'Music', icon: Music, count: 128 },
-  { id: 'sfx', label: 'SFX', icon: Volume2, count: 982 },
-  { id: 'exports', label: 'Exports', icon: Download, count: 73 },
+  { id: 'images', label: 'Images', icon: Image, count: 0 },
+  { id: 'videos', label: 'Videos', icon: Film, count: 0 },
+  { id: 'voices', label: 'Voices', icon: Mic, count: 0 },
+  { id: 'music', label: 'Music', icon: Music, count: 0 },
+  { id: 'sfx', label: 'SFX', icon: Volume2, count: 0 },
+  { id: 'exports', label: 'Exports', icon: Download, count: 0 },
 ]
 
 const mockImages = Array.from({ length: 18 }, (_, i) => ({
@@ -59,8 +64,22 @@ const mockAudioItems = Array.from({ length: 8 }, (_, i) => ({
 }))
 
 export default function AssetLibraryPage() {
-  const [activeTab, setActiveTab] = useState('images')
+  const [activeTab, setActiveTab] = useState('videos')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+
+  const { activeProject } = useProjectStore()
+  const { videos, fetchVideos } = useAssetStore()
+
+  useEffect(() => {
+    if (activeProject) fetchVideos(activeProject.id)
+  }, [activeProject, fetchVideos])
+
+  const completedVideos = videos.filter(v => v.status === 'completed')
+
+  const dynamicTabs = tabs.map(t => {
+    if (t.id === 'videos') return { ...t, count: completedVideos.length }
+    return t
+  })
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
@@ -80,7 +99,7 @@ export default function AssetLibraryPage() {
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            {tabs.map((tab) => {
+            {dynamicTabs.map((tab) => {
               const Icon = tab.icon
               return (
                 <TabsTrigger key={tab.id} value={tab.id} className="gap-1.5">
@@ -199,10 +218,81 @@ export default function AssetLibraryPage() {
       )}
 
       {/* Videos / Exports placeholder */}
-      {(['videos', 'exports'].includes(activeTab)) && (
+      {(['videos'].includes(activeTab)) && (
+        <motion.div variants={containerVariants} initial="hidden" animate="visible"
+          className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3" : "space-y-2"}
+        >
+          {completedVideos.map((video, i) => (
+            viewMode === 'grid' ? (
+              <motion.div
+                key={video.id}
+                variants={itemVariants}
+                whileHover={{ y: -3 }}
+                className="rounded-lg border border-border overflow-hidden cursor-pointer group hover:border-border-hover transition-all duration-200"
+              >
+                <div className="aspect-square relative bg-card flex items-center justify-center">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                  
+                  {video.url ? (
+                    <video src={video.url} className="w-full h-full object-cover" muted loop playsInline onMouseOver={(e) => (e.target as HTMLVideoElement).play()} onMouseOut={(e) => (e.target as HTMLVideoElement).pause()} />
+                  ) : (
+                    <Film className="w-8 h-8 text-text-muted" />
+                  )}
+
+                  <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-20">
+                    <button className="p-1 rounded bg-black/40 backdrop-blur hover:bg-black/60 transition-colors cursor-pointer">
+                      <Eye className="w-3 h-3 text-white" />
+                    </button>
+                    <button className="p-1 rounded bg-black/40 backdrop-blur hover:bg-black/60 transition-colors cursor-pointer" onClick={() => window.open(video.url || '', '_blank')}>
+                      <Download className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                </div>
+                <div className="p-2 bg-card-elevated">
+                  <p className="text-[10px] font-medium text-text-primary truncate" title={video.prompt || ''}>
+                    {video.prompt || `Scene ${video.scene_id}`}
+                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[9px] text-text-muted">{video.model}</span>
+                    <span className="text-[9px] text-text-muted">{formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}</span>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={video.id}
+                variants={itemVariants}
+                className="glass-card p-3 flex items-center gap-4 cursor-pointer group"
+              >
+                <div className="w-12 h-12 rounded-md shrink-0 bg-card flex items-center justify-center overflow-hidden">
+                   {video.url ? (
+                    <video src={video.url} className="w-full h-full object-cover" muted />
+                  ) : (
+                    <Film className="w-4 h-4 text-text-muted" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-text-primary truncate">{video.prompt || `Scene ${video.scene_id}`}</p>
+                  <p className="text-[10px] text-text-muted">{video.model} • {formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}</p>
+                </div>
+                <Badge variant="accent" className="text-[9px]">Video</Badge>
+              </motion.div>
+            )
+          ))}
+          {completedVideos.length === 0 && (
+            <div className="col-span-full glass-card p-12 flex flex-col items-center justify-center">
+              <Film className="w-10 h-10 text-text-muted mb-3" />
+              <p className="text-sm text-text-secondary mb-1">No completed videos yet.</p>
+              <p className="text-xs text-text-muted">Generate videos from the Storyboard Vault.</p>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {(['exports'].includes(activeTab)) && (
         <div className="glass-card p-12 flex flex-col items-center justify-center">
-          <Film className="w-10 h-10 text-text-muted mb-3" />
-          <p className="text-sm text-text-secondary mb-1">{activeTab === 'videos' ? 'Video assets' : 'Export packages'}</p>
+          <Download className="w-10 h-10 text-text-muted mb-3" />
+          <p className="text-sm text-text-secondary mb-1">Export packages</p>
           <p className="text-xs text-text-muted">Run a production pipeline to generate {activeTab}</p>
         </div>
       )}

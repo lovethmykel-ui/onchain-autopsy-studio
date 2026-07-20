@@ -21,18 +21,10 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } },
 }
 
-const mockJobs = [
-  { id: '1', scene: 'Scene 45 - Conference Hall', model: 'Seedance 1.0', resolution: '4K', fps: 24, status: 'processing', progress: 71, started: '12 mins ago' },
-  { id: '2', scene: 'Scene 46 - Ruja Speaking', model: 'Seedance 1.0', resolution: '4K', fps: 24, status: 'processing', progress: 52, started: '10 mins ago' },
-  { id: '3', scene: 'Scene 47 - Investor Crowd', model: 'Veo 3', resolution: '1080p', fps: 30, status: 'processing', progress: 28, started: '8 mins ago' },
-  { id: '4', scene: 'Scene 48 - News Report', model: 'Kling 2.0', resolution: '1080p', fps: 30, status: 'pending', progress: 0, started: 'Queued' },
-  { id: '5', scene: 'Scene 49 - Court Exterior', model: 'Hailuo', resolution: '1080p', fps: 24, status: 'pending', progress: 0, started: 'Queued' },
-  { id: '6', scene: 'Scene 50 - Airport Tarmac', model: 'Runway', resolution: '4K', fps: 24, status: 'pending', progress: 0, started: 'Queued' },
-  { id: '7', scene: 'Scene 30 - Office Interior', model: 'Seedance 1.0', resolution: '4K', fps: 24, status: 'completed', progress: 100, started: '45 mins ago' },
-  { id: '8', scene: 'Scene 31 - Sofia Skyline', model: 'Veo 3', resolution: '4K', fps: 30, status: 'completed', progress: 100, started: '42 mins ago' },
-  { id: '9', scene: 'Scene 32 - Server Room', model: 'Kling 2.0', resolution: '1080p', fps: 24, status: 'completed', progress: 100, started: '38 mins ago' },
-  { id: '10', scene: 'Scene 22 - MLM Event', model: 'Luma', resolution: '1080p', fps: 24, status: 'failed', progress: 67, started: '1h ago', error: 'Content moderation flag - scene contains crowd manipulation imagery' },
-]
+import { useEffect } from 'react'
+import { useProjectStore } from '@/lib/store/project'
+import { useAssetStore } from '@/lib/store/asset'
+import { formatDistanceToNow } from 'date-fns'
 
 const statusConfig = {
   pending: { label: 'Pending', icon: Clock, color: 'text-text-muted', bg: 'bg-card' },
@@ -43,17 +35,25 @@ const statusConfig = {
 
 export default function RenderQueuePage() {
   const [activeTab, setActiveTab] = useState('all')
+  const { activeProject } = useProjectStore()
+  const { videos, fetchVideos, isLoading } = useAssetStore()
+
+  useEffect(() => {
+    if (activeProject) {
+      fetchVideos(activeProject.id)
+    }
+  }, [activeProject, fetchVideos])
 
   const filteredJobs = activeTab === 'all'
-    ? mockJobs
-    : mockJobs.filter(j => j.status === activeTab)
+    ? videos
+    : videos.filter(j => j.status === activeTab)
 
   const counts = {
-    all: mockJobs.length,
-    pending: mockJobs.filter(j => j.status === 'pending').length,
-    processing: mockJobs.filter(j => j.status === 'processing').length,
-    completed: mockJobs.filter(j => j.status === 'completed').length,
-    failed: mockJobs.filter(j => j.status === 'failed').length,
+    all: videos.length,
+    pending: videos.filter(j => j.status === 'pending').length,
+    processing: videos.filter(j => j.status === 'processing').length,
+    completed: videos.filter(j => j.status === 'completed').length,
+    failed: videos.filter(j => j.status === 'failed').length,
   }
 
   return (
@@ -123,29 +123,29 @@ export default function RenderQueuePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-xs font-medium text-text-primary">{job.scene}</p>
+                      <p className="text-xs font-medium text-text-primary">Scene {job.scene_id}</p>
                       <Badge variant={job.status === 'completed' ? 'success' : job.status === 'failed' ? 'error' : 'accent'} className="text-[9px]">
                         {config.label}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-3 text-[10px] text-text-muted">
                       <span className="flex items-center gap-1"><Film className="w-3 h-3" />{job.model}</span>
-                      <span className="flex items-center gap-1"><Monitor className="w-3 h-3" />{job.resolution}</span>
-                      <span>{job.fps}fps</span>
-                      <span>{job.started}</span>
+                      <span className="flex items-center gap-1"><Monitor className="w-3 h-3" />{'1080p'}</span>
+                      <span>{'24fps'}</span>
+                      <span>{formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}</span>
                     </div>
-                    {job.error && (
+                    {job.status === 'failed' && (
                       <p className="text-[10px] text-error mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />{job.error}
+                        <AlertCircle className="w-3 h-3" />Failed to generate
                       </p>
                     )}
                     {job.status === 'processing' && (
-                      <Progress value={job.progress} className="h-1 mt-2" />
+                      <Progress value={50} className="h-1 mt-2" />
                     )}
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     {job.status === 'processing' && (
-                      <span className="text-sm font-bold text-accent">{job.progress}%</span>
+                      <span className="text-sm font-bold text-accent">50%</span>
                     )}
                     <div className="flex items-center gap-1">
                       {job.status === 'failed' && (

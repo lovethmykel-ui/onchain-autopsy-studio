@@ -30,14 +30,10 @@ const gradients = [
   'linear-gradient(135deg, #0a1a0a 0%, #1a3e1a 50%, #0a1a0a 100%)',
 ]
 
-const mockProjects = [
-  { id: '1', title: 'OneCoin Documentary', topic: 'OneCoin', type: 'Crypto Scams', status: 'in_production', progress: 73, workflow: 'Full Documentary', created: 'May 20, 2026', updated: '2 mins ago' },
-  { id: '2', title: 'FTX Collapse', topic: 'FTX', type: 'Exchange Collapses', status: 'in_production', progress: 48, workflow: 'Full Documentary', created: 'May 18, 2026', updated: '1 day ago' },
-  { id: '3', title: 'Terra Luna Crash', topic: 'Terra Luna', type: 'Exchange Collapses', status: 'in_production', progress: 62, workflow: 'Short Documentary', created: 'May 15, 2026', updated: '3 days ago' },
-  { id: '4', title: 'Bybit Hack Investigation', topic: 'Bybit Hack', type: 'Blockchain Investigations', status: 'in_production', progress: 35, workflow: 'Investigation Report', created: 'May 12, 2026', updated: '3 days ago' },
-  { id: '5', title: 'Pig Butchering Scams', topic: 'Pig Butchering', type: 'Fraud Investigations', status: 'draft', progress: 20, workflow: 'Full Documentary', created: 'May 10, 2026', updated: '5 days ago' },
-  { id: '6', title: 'Mt. Gox Collapse', topic: 'Mt. Gox', type: 'Exchange Collapses', status: 'completed', progress: 100, workflow: 'Script Only', created: 'May 5, 2026', updated: '10 days ago' },
-]
+import { useEffect, useState } from 'react'
+import { useProjectStore } from '@/lib/store/project'
+import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
+import { formatDistanceToNow } from 'date-fns'
 
 const statusVariant = {
   draft: 'draft',
@@ -47,6 +43,13 @@ const statusVariant = {
 } as const
 
 export default function ProjectsPage() {
+  const { projects, fetchProjects, isLoading, setActiveProject } = useProjectStore()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
+
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={itemVariants} className="flex items-center justify-between">
@@ -54,7 +57,7 @@ export default function ProjectsPage() {
           <h1 className="text-2xl font-bold text-text-primary font-heading">Projects</h1>
           <p className="text-sm text-text-secondary mt-1">All documentary and investigation projects</p>
         </div>
-        <Button className="gap-2">
+        <Button onClick={() => setIsModalOpen(true)} className="gap-2">
           <Plus className="w-4 h-4" />
           New Project
         </Button>
@@ -72,11 +75,18 @@ export default function ProjectsPage() {
       </motion.div>
 
       <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockProjects.map((project, i) => (
+        {projects.length === 0 && !isLoading && (
+          <div className="col-span-full py-12 text-center border border-dashed border-border rounded-lg">
+            <p className="text-text-muted mb-4">No projects yet. Create your first documentary project.</p>
+            <Button variant="outline" onClick={() => setIsModalOpen(true)}>Initialize Project</Button>
+          </div>
+        )}
+        {projects.map((project, i) => (
           <motion.div
             key={project.id}
             variants={itemVariants}
             whileHover={{ y: -3 }}
+            onClick={() => setActiveProject(project)}
             className="glass-card overflow-hidden cursor-pointer group hover:border-border-hover transition-all duration-200"
           >
             <div className="h-32 relative" style={{ background: gradients[i % gradients.length] }}>
@@ -97,21 +107,23 @@ export default function ProjectsPage() {
                   {project.status === 'in_production' ? 'In Production' :
                    project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                 </Badge>
-                <Badge variant="default" className="text-[9px]">{project.workflow}</Badge>
+                <Badge variant="default" className="text-[9px]">{project.workflow_type}</Badge>
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] text-text-muted">Progress</span>
-                <span className="text-xs font-bold text-accent">{project.progress}%</span>
+                <span className="text-xs font-bold text-accent">{project.progress || 0}%</span>
               </div>
-              <Progress value={project.progress} className="h-1.5 mb-3" />
+              <Progress value={project.progress || 0} className="h-1.5 mb-3" />
               <div className="flex items-center justify-between text-[10px] text-text-muted">
-                <span>{project.created}</span>
-                <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{project.updated}</span>
+                <span>{new Date(project.created_at).toLocaleDateString()}</span>
+                <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatDistanceToNow(new Date(project.updated_at), { addSuffix: true })}</span>
               </div>
             </div>
           </motion.div>
         ))}
       </motion.div>
+
+      <CreateProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </motion.div>
   )
 }

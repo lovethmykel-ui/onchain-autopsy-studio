@@ -33,31 +33,44 @@ const gradients = [
   'linear-gradient(135deg, #0a1a1a 0%, #1a3e3e 50%, #0a1a1a 100%)',
 ]
 
-const mockScenes = Array.from({ length: 24 }, (_, i) => ({
-  id: i + 1,
-  sceneNumber: i + 1,
-  shotType: shotTypes[i % shotTypes.length],
-  cameraMovement: ['Slow Pan Right', 'Static', 'Dolly In', 'Crane Up', 'Tracking Left', 'Steady', 'Zoom In', 'Orbit'][i % 8],
-  lighting: ['Low Key', 'High Key', 'Natural', 'Dramatic', 'Silhouette', 'Neon', 'Golden Hour', 'Studio'][i % 8],
-  location: ['Conference Hall', 'Office Interior', 'Street View', 'Courtroom', 'News Studio', 'Server Room', 'Luxury Villa', 'Airport'][i % 8],
-  mood: moods[i % moods.length],
-  visualDescription: [
-    'Ruja Ignatova stands at a podium before thousands of cheering supporters in a massive arena, giant screens behind her displaying OneCoin branding.',
-    'A dark, cluttered office filled with monitors showing cryptocurrency charts. A figure types rapidly at a keyboard, face illuminated by screen light.',
-    'Aerial drone shot of Sofia, Bulgaria skyline at dusk. City lights beginning to illuminate against a deep purple sky.',
-    'Interior of a modern courtroom. Judge sits elevated, the defense table is crowded with lawyers reviewing documents.',
-    'Split screen of multiple news anchors from around the world reporting on the OneCoin scandal simultaneously.',
-    'Rows upon rows of humming servers in a dimly lit data center. LED lights blink in patterns, cables run everywhere.',
-    'Luxurious penthouse apartment with panoramic city views. Expensive art on walls, champagne glasses on a marble counter.',
-    'A private jet parked on a tarmac at night. A single figure walks toward it, silhouetted against airport lights.',
-  ][i % 8],
-  duration: Math.floor(Math.random() * 8) + 3,
-  gradient: gradients[i % gradients.length],
-}))
+import { useEffect } from 'react'
+import { useProjectStore } from '@/lib/store/project'
+import { useScriptStore } from '@/lib/store/script'
+import { useStoryboardStore } from '@/lib/store/storyboard'
+import { useAssetStore } from '@/lib/store/asset'
+import { useRouter } from 'next/navigation'
 
 export default function StoryboardVaultPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [selectedScene, setSelectedScene] = useState<typeof mockScenes[0] | null>(null)
+  const [selectedScene, setSelectedScene] = useState<any>(null)
+  const [selectedModel, setSelectedModel] = useState<string>('Luma')
+  const router = useRouter()
+
+  const { activeProject } = useProjectStore()
+  const { scripts, fetchScripts } = useScriptStore()
+  const { storyboards, fetchStoryboards, generateStoryboard, isGenerating } = useStoryboardStore()
+  const { generateVideo } = useAssetStore()
+
+  useEffect(() => {
+    if (activeProject) {
+      fetchScripts(activeProject.id)
+      fetchStoryboards(activeProject.id)
+    }
+  }, [activeProject, fetchScripts, fetchStoryboards])
+
+  const activeStoryboard = storyboards[0]
+  const scenes = activeStoryboard?.scenes ? (activeStoryboard.scenes as any[]) : []
+  
+  const handleGenerate = async () => {
+    if (!activeProject) return
+    const script = scripts[0]
+    if (!script) {
+      // Need a script first
+      router.push('/script-vault')
+      return
+    }
+    await generateStoryboard(activeProject.id, script.id, script.narration || '', activeProject.topic)
+  }
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
@@ -82,9 +95,9 @@ export default function StoryboardVaultPage() {
               <List className="w-4 h-4" />
             </button>
           </div>
-          <Button className="gap-2">
+          <Button onClick={handleGenerate} disabled={isGenerating || !activeProject} className="gap-2">
             <Plus className="w-4 h-4" />
-            Generate Storyboard
+            {isGenerating ? 'Generating...' : 'Generate Storyboard'}
           </Button>
         </div>
       </motion.div>
@@ -95,21 +108,28 @@ export default function StoryboardVaultPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <Input placeholder="Search scenes..." className="pl-10" />
         </div>
-        <Badge variant="accent">{mockScenes.length} Scenes</Badge>
+        <Badge variant="accent">{scenes.length} Scenes</Badge>
       </motion.div>
 
       {/* Grid View */}
-      {viewMode === 'grid' ? (
+      {scenes.length === 0 && !isGenerating && (
+        <div className="py-12 text-center border border-dashed border-border rounded-lg">
+          <p className="text-text-muted mb-4">No storyboard generated for this project yet.</p>
+          <Button variant="outline" onClick={handleGenerate}>Generate Storyboard</Button>
+        </div>
+      )}
+      
+      {viewMode === 'grid' && scenes.length > 0 ? (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {mockScenes.map((scene) => (
+          {scenes.map((scene, i) => (
             <motion.div
-              key={scene.id}
+              key={i}
               variants={itemVariants}
               whileHover={{ y: -3, scale: 1.01 }}
-              onClick={() => setSelectedScene(scene)}
+              onClick={() => setSelectedScene({...scene, gradient: gradients[i % gradients.length]})}
               className="rounded-lg border border-border overflow-hidden cursor-pointer group hover:border-border-hover transition-all duration-200"
             >
-              <div className="h-32 relative" style={{ background: scene.gradient }}>
+              <div className="h-32 relative" style={{ background: gradients[i % gradients.length] }}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 <div className="absolute top-2 left-2 bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-[9px] font-bold text-white">
                   Scene {scene.sceneNumber}
@@ -136,18 +156,18 @@ export default function StoryboardVaultPage() {
             </motion.div>
           ))}
         </motion.div>
-      ) : (
+      ) : scenes.length > 0 ? (
         /* List View */
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-2">
-          {mockScenes.map((scene) => (
+          {scenes.map((scene, i) => (
             <motion.div
-              key={scene.id}
+              key={i}
               variants={itemVariants}
               whileHover={{ x: 2 }}
-              onClick={() => setSelectedScene(scene)}
+              onClick={() => setSelectedScene({...scene, gradient: gradients[i % gradients.length]})}
               className="glass-card p-4 flex items-center gap-4 cursor-pointer group"
             >
-              <div className="w-24 h-16 rounded-md shrink-0 relative overflow-hidden" style={{ background: scene.gradient }}>
+              <div className="w-24 h-16 rounded-md shrink-0 relative overflow-hidden" style={{ background: gradients[i % gradients.length] }}>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-[10px] font-bold text-white/80">#{scene.sceneNumber}</span>
                 </div>
@@ -166,7 +186,7 @@ export default function StoryboardVaultPage() {
             </motion.div>
           ))}
         </motion.div>
-      )}
+      ) : null}
 
       {/* Scene Detail Modal */}
       <AnimatePresence>
@@ -208,6 +228,38 @@ export default function StoryboardVaultPage() {
                   <DetailItem icon={<MapPin className="w-4 h-4" />} label="Location" value={selectedScene.location} />
                   <DetailItem icon={<Palette className="w-4 h-4" />} label="Mood" value={selectedScene.mood} />
                   <DetailItem icon={<Eye className="w-4 h-4" />} label="Duration" value={`${selectedScene.duration} seconds`} />
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-text-muted">Model:</span>
+                    <select 
+                      className="bg-card border border-border rounded text-xs px-2 py-1 text-text-primary"
+                      value={selectedModel}
+                      onChange={e => setSelectedModel(e.target.value)}
+                    >
+                      <option value="Luma">Luma Dream Machine</option>
+                      <option value="Runway">Runway Gen-3</option>
+                    </select>
+                  </div>
+                  <Button 
+                    className="gap-2" 
+                    onClick={() => {
+                      if (!activeProject) return
+                      // trigger generate video
+                      generateVideo(
+                        activeProject.id, 
+                        selectedScene.sceneNumber.toString(), 
+                        selectedScene.visualDescription, 
+                        selectedModel
+                      )
+                      setSelectedScene(null)
+                      router.push('/render-queue')
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Render Scene to Video
+                  </Button>
                 </div>
               </div>
             </motion.div>
