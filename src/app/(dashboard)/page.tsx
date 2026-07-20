@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { useAppStore } from '@/store/useAppStore'
 import { AGENTS, WORKFLOW_TYPES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -80,6 +81,22 @@ const pipelineAgents = AGENTS.map((agent, i) => ({
 }))
 
 export default function DashboardPage() {
+  const storeActiveId = useAppStore(state => state.activeProjectId)
+  const storeProjects = useAppStore(state => state.projects)
+  const activeStoreProject = storeProjects.find(p => p.id === storeActiveId)
+
+  // Fallback to mock if no active project
+  const displayProject = activeStoreProject ? {
+    title: activeStoreProject.title,
+    description: `Generating content for ${activeStoreProject.topic}...`,
+    status: activeStoreProject.status === 'in_production' ? 'In Production' : activeStoreProject.status,
+    progress: activeStoreProject.progress,
+    type: 'Investigation',
+    created: 'Just now',
+    updated: 'Just now',
+    target: 'YouTube / Web'
+  } : currentProject;
+
   return (
     <motion.div
       variants={containerVariants}
@@ -95,18 +112,17 @@ export default function DashboardPage() {
           <motion.div variants={itemVariants} className="xl:col-span-2 glass-card p-5">
             <div className="flex items-start justify-between mb-1">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-1">
-                  <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">CURRENT PROJECT</p>
-                </div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-xl font-bold text-text-primary font-heading">{currentProject.title}</h1>
-                  <Badge variant="in-production">{currentProject.status}</Badge>
-                </div>
-                <p className="text-xs text-text-secondary mb-4 max-w-lg leading-relaxed">
-                  {currentProject.description}
-                </p>
+                <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">CURRENT PROJECT</p>
+                <h2 className="text-xl font-bold font-heading text-text-primary tracking-tight mt-1">{displayProject.title}</h2>
               </div>
-              {/* Thumbnail area */}
+              <Badge variant={displayProject.status === 'In Production' ? 'accent' : 'default'} className="ml-4 shrink-0">
+                {displayProject.status}
+              </Badge>
+            </div>
+            
+            <div className="flex mb-4">
+              <p className="text-sm text-text-secondary line-clamp-2 pr-4">{displayProject.description}</p>
+              
               <div className="hidden md:block w-48 h-28 rounded-lg overflow-hidden relative ml-4 shrink-0"
                 style={{ background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%)' }}
               >
@@ -116,8 +132,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                  <p className="text-[10px] font-bold text-white tracking-widest uppercase">ONECOIN</p>
-                  <p className="text-[8px] text-white/60 tracking-[0.2em] uppercase">THE BILLION DOLLAR LIE</p>
+                  <p className="text-[10px] font-bold text-white tracking-widest uppercase line-clamp-1">{displayProject.title}</p>
+                  <p className="text-[8px] text-white/60 tracking-[0.2em] uppercase line-clamp-1">LIVE PREVIEW</p>
                 </div>
               </div>
             </div>
@@ -126,9 +142,9 @@ export default function DashboardPage() {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] text-text-muted">Progress</span>
-                <span className="text-xs font-bold text-accent">{currentProject.progress}% Complete</span>
+                <span className="text-xs font-bold text-accent">{displayProject.progress}% Complete</span>
               </div>
-              <Progress value={currentProject.progress} className="h-2" />
+              <Progress value={displayProject.progress} className="h-2" />
             </div>
 
             {/* Meta */}
@@ -136,22 +152,22 @@ export default function DashboardPage() {
               <div className="flex items-center gap-1.5">
                 <Monitor className="w-3.5 h-3.5" />
                 <span>Type</span>
-                <span className="text-text-secondary font-medium">{currentProject.type}</span>
+                <span className="text-text-secondary font-medium">{displayProject.type}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 <span>Created</span>
-                <span className="text-text-secondary font-medium">{currentProject.created}</span>
+                <span className="text-text-secondary font-medium">{displayProject.created}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
                 <span>Updated</span>
-                <span className="text-text-secondary font-medium">{currentProject.updated}</span>
+                <span className="text-text-secondary font-medium">{displayProject.updated}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5" />
                 <span>Target</span>
-                <span className="text-text-secondary font-medium">{currentProject.target}</span>
+                <span className="text-text-secondary font-medium">{displayProject.target}</span>
               </div>
             </div>
           </motion.div>

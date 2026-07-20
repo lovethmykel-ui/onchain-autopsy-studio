@@ -10,6 +10,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { useAppStore } from '@/store/useAppStore'
 import { WORKFLOW_TYPES, AGENTS, PROJECT_TYPES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -34,10 +37,43 @@ export default function WorkflowPage() {
   const [projectType, setProjectType] = useState(PROJECT_TYPES[0])
   const [isLaunching, setIsLaunching] = useState(false)
 
-  const handleLaunch = () => {
+  const router = useRouter()
+  const addProject = useAppStore((state) => state.addProject)
+
+  const handleLaunch = async () => {
     if (!topic.trim()) return
     setIsLaunching(true)
-    setTimeout(() => setIsLaunching(false), 3000)
+    
+    try {
+      const res = await fetch('/api/workflow/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, type: projectType })
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        toast.success('Production pipeline launched successfully!')
+        
+        // Add to global state so it appears on the dashboard
+        addProject({
+          id: data.projectId,
+          title: topic,
+          topic: topic,
+          status: 'in_production',
+          progress: 5
+        })
+        
+        router.push('/')
+      } else {
+        toast.error(data.error || 'Failed to launch pipeline.')
+      }
+    } catch (error) {
+      toast.error('Network error. Failed to start workflow.')
+    } finally {
+      setIsLaunching(false)
+    }
   }
 
   return (
