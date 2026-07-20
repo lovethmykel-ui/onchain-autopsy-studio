@@ -2,144 +2,137 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, KeyRound, ArrowRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function LoginPage() {
-  const router = useRouter()
-  const supabase = createClient()
-  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError(null)
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+    const supabase = createClient()
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (authError) {
+      setError(authError.message)
+      toast.error('Login Failed', {
+        description: authError.message,
       })
-
-      if (error) {
-        toast.error(error.message)
-      } else {
-        toast.success('Access granted.')
-        router.push('/')
-        router.refresh()
-      }
-    } catch (err: any) {
-      toast.error('An unexpected error occurred.')
-    } finally {
       setIsLoading(false)
-    }
-  }
-
-  const handleSignUp = async () => {
-    setIsLoading(true)
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${location.origin}/auth/callback`,
-        },
+    } else {
+      toast.success('Login Successful', {
+        description: 'Welcome to OnChain Autopsy Studio',
       })
-      if (error) {
-        toast.error(error.message)
-      } else {
-        toast.success('Registration successful! Please check your email.')
-      }
-    } catch (err: any) {
-      toast.error('An unexpected error occurred.')
-    } finally {
-      setIsLoading(false)
+      router.push('/')
+      router.refresh()
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-neutral-900/40 via-black to-black p-4">
-      
-      {/* Decorative Grid */}
-      <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="min-h-screen bg-bg-dark flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-[120px] opacity-50 mix-blend-screen pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] opacity-50 mix-blend-screen pointer-events-none" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-md z-10"
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md relative z-10"
       >
-        <div className="bg-neutral-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-          
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-4">
-              <KeyRound className="w-6 h-6 text-cyan-400" />
-            </div>
-            <h1 className="text-2xl font-bold font-heading text-white tracking-tight">OnChain Autopsy</h1>
-            <p className="text-sm text-neutral-400 mt-2 text-center">
-              Authenticate to access the AI Documentary Studio
+        <div className="glass-card p-8 border-accent/20">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight mb-2">
+              Studio Login
+            </h1>
+            <p className="text-sm text-text-secondary">
+              Enter your credentials to access the documentary pipeline.
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-300">Email Address</label>
-              <Input 
-                type="email" 
-                placeholder="investigator@onchain.com" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-black/50 border-white/10 text-white placeholder:text-neutral-600 focus:border-cyan-500/50"
-              />
-            </div>
-            
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-300">Passphrase</label>
-              <Input 
-                type="password" 
-                placeholder="••••••••••••" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-black/50 border-white/10 text-white placeholder:text-neutral-600 focus:border-cyan-500/50"
-              />
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start gap-3 text-red-400 text-sm"
+              >
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider ml-1">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Input 
+                  type="email"
+                  placeholder="agent@onchain-autopsy.com"
+                  className="pl-10 h-12"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="pt-2 flex flex-col gap-3">
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full bg-white text-black hover:bg-neutral-200 transition-colors"
-              >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Initialize Session
-                {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
-              </Button>
-              
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={handleSignUp}
-                disabled={isLoading}
-                className="w-full bg-transparent border-white/10 text-white hover:bg-white/5 transition-colors"
-              >
-                Request Access
-              </Button>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider ml-1">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Input 
+                  type="password"
+                  placeholder="••••••••"
+                  className="pl-10 h-12"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-12 mt-6 text-base font-medium relative overflow-hidden group"
+              disabled={isLoading}
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-accent/0 via-white/10 to-accent/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            </Button>
           </form>
 
+          <div className="mt-8 text-center text-xs text-text-muted">
+            <p>Protected by OnChain Autopsy Studio OS</p>
+          </div>
         </div>
-        
-        <p className="text-center text-xs text-neutral-500 mt-6">
-          Authorized personnel only. End-to-end encrypted session.
-        </p>
       </motion.div>
     </div>
   )

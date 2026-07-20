@@ -11,6 +11,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
+import { useProjectStore } from '@/lib/store/project'
+import { useScriptStore } from '@/lib/store/script'
+import { useSettingsStore } from '@/lib/store/settings'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -21,28 +26,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } },
 }
 
-const mockScripts = [
-  {
-    id: '1', title: 'OneCoin: The Billion Dollar Lie', duration: '60min', project: 'OneCoin Documentary',
-    status: 'completed', words: 8420, scenes: 42, created: '2026-05-20',
-    excerpt: 'In 2014, a charismatic Bulgarian-German woman named Ruja Ignatova stood before thousands of cheering supporters in Sofia, Bulgaria. She promised them a revolution — a cryptocurrency that would overtake Bitcoin and change the world...',
-  },
-  {
-    id: '2', title: 'OneCoin: Condensed Version', duration: '30min', project: 'OneCoin Documentary',
-    status: 'completed', words: 4210, scenes: 24, created: '2026-05-20',
-    excerpt: 'What if everything you believed about a new digital currency was a lie? That\'s the story of OneCoin — the biggest cryptocurrency fraud in history...',
-  },
-  {
-    id: '3', title: 'FTX: Castle of Cards', duration: '60min', project: 'FTX Collapse',
-    status: 'in_progress', words: 6100, scenes: 36, created: '2026-05-18',
-    excerpt: 'Sam Bankman-Fried was the golden boy of crypto. A MIT graduate who built a multi-billion dollar empire before the age of 30...',
-  },
-  {
-    id: '4', title: 'OneCoin: YouTube Short', duration: '15min', project: 'OneCoin Documentary',
-    status: 'completed', words: 2100, scenes: 12, created: '2026-05-19',
-    excerpt: 'She was the crypto queen. She promised billions a better future. Then she vanished...',
-  },
-]
+// Removed static mockScripts
 
 const durationColors: Record<string, string> = {
   '15min': '#10B981',
@@ -52,6 +36,95 @@ const durationColors: Record<string, string> = {
 
 export default function ScriptVaultPage() {
   const [selectedScript, setSelectedScript] = useState<string | null>(null)
+  const { activeProject } = useProjectStore()
+  const { scripts, fetchScripts, addScript } = useScriptStore()
+  const { getAllKeys } = useSettingsStore()
+  
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedText, setGeneratedText] = useState('')
+
+  React.useEffect(() => {
+    if (activeProject) {
+      fetchScripts(activeProject.id)
+    }
+  }, [activeProject, fetchScripts])
+
+  const handleGenerateScript = async () => {
+    if (!activeProject) {
+      toast.error('Please select or create a project first.')
+      return
+    }
+
+    const keys = getAllKeys()
+
+    setIsGenerating(true)
+    setGeneratedText('')
+    setSelectedScript('generating')
+
+    try {
+      const res = await fetch('/api/ai/generate-script', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${encodeURIComponent(JSON.stringify(keys))}`
+        },
+        body: JSON.stringify({
+          topic: activeProject.topic,
+          type: activeProject.type,
+          targetPlatform: activeProject.target_platform,
+          durationTarget: activeProject.duration_target || '15min'
+        })
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to generate')
+      }
+
+      const reader = res.body?.getReader()
+      const decoder = new TextDecoder()
+      let fullText = ''
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          const chunk = decoder.decode(value)
+          // The ai sdk streams chunks typically starting with '0:'
+          const lines = chunk.split('\\n')
+          for (const line of lines) {
+            if (line.startsWith('0:')) {
+              const text = JSON.parse(line.slice(2))
+              fullText += text
+              setGeneratedText(prev => prev + text)
+            }
+          }
+        }
+      }
+
+      // Save to Supabase
+      const supabase = createClient()
+      const { data, error } = await supabase.from('scripts').insert({
+        project_id: activeProject.id,
+        duration_type: (activeProject.duration_target || '15min') as any,
+        narration: fullText,
+        scene_notes: '',
+        visual_directions: ''
+      }).select().single()
+
+      if (error) throw error
+      if (data) addScript(data)
+      
+      toast.success('Script generated successfully!')
+      setSelectedScript(data.id)
+    } catch (err: any) {
+      console.error(err)
+      toast.error(err.message)
+      setSelectedScript(null)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
@@ -61,9 +134,9 @@ export default function ScriptVaultPage() {
           <h1 className="text-2xl font-bold text-text-primary font-heading">Script Vault</h1>
           <p className="text-sm text-text-secondary mt-1">Documentary narrations, voiceover scripts, and scene notes</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleGenerateScript} disabled={isGenerating}>
           <Plus className="w-4 h-4" />
-          Generate Script
+          {isGenerating ? 'Generating...' : 'Generate Script'}
         </Button>
       </motion.div>
 
@@ -81,7 +154,21 @@ export default function ScriptVaultPage() {
 
       {/* Scripts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {mockScripts.map((script) => (
+        {isGenerating && (
+          <motion.div variants={itemVariants} className="glass-card p-5 border-accent/30 accent-glow">
+            <h3 className="text-sm font-semibold text-accent mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 animate-spin" />
+              Writing Script for {activeProject?.title}...
+            </h3>
+            <div className="bg-card-elevated rounded-md p-3 border border-border h-[150px] overflow-y-auto">
+              <p className="text-[11px] text-text-secondary leading-relaxed whitespace-pre-wrap">
+                {generatedText}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {scripts.map((script) => (
           <motion.div
             key={script.id}
             variants={itemVariants}
@@ -96,41 +183,37 @@ export default function ScriptVaultPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="text-sm font-semibold text-text-primary truncate group-hover:text-accent transition-colors">
-                    {script.title}
+                    {activeProject?.title || 'Unknown Project'} - {script.duration_type}
                   </h3>
                 </div>
-                <p className="text-[10px] text-text-muted">{script.project}</p>
+                <p className="text-[10px] text-text-muted">Generated {new Date(script.created_at).toLocaleDateString()}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <Badge
                   className="text-[9px]"
                   style={{
-                    backgroundColor: `${durationColors[script.duration]}15`,
-                    color: durationColors[script.duration],
-                    borderColor: `${durationColors[script.duration]}30`,
+                    backgroundColor: `${durationColors[script.duration_type] || durationColors['15min']}15`,
+                    color: durationColors[script.duration_type] || durationColors['15min'],
+                    borderColor: `${durationColors[script.duration_type] || durationColors['15min']}30`,
                   }}
                 >
-                  {script.duration}
+                  {script.duration_type}
                 </Badge>
-                <Badge variant={script.status === 'completed' ? 'success' : 'accent'}>
-                  {script.status === 'completed' ? 'Complete' : 'Writing'}
-                </Badge>
+                <Badge variant="success">Complete</Badge>
               </div>
             </div>
 
             {/* Excerpt */}
             <div className="bg-card-elevated rounded-md p-3 mb-3 border border-border">
               <p className="text-[11px] text-text-secondary leading-relaxed line-clamp-3 italic">
-                &ldquo;{script.excerpt}&rdquo;
+                &ldquo;{script.narration?.slice(0, 200)}...&rdquo;
               </p>
             </div>
 
             {/* Meta */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-[10px] text-text-muted">
-                <span className="flex items-center gap-1"><FileText className="w-3 h-3" />{script.words.toLocaleString()} words</span>
-                <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" />{script.scenes} scenes</span>
-                <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{script.created}</span>
+                <span className="flex items-center gap-1"><FileText className="w-3 h-3" />{script.narration?.split(' ').length || 0} words</span>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button className="p-1.5 rounded hover:bg-card-hover transition-colors cursor-pointer">
@@ -146,6 +229,11 @@ export default function ScriptVaultPage() {
             </div>
           </motion.div>
         ))}
+        {scripts.length === 0 && !isGenerating && (
+          <div className="col-span-1 lg:col-span-2 text-center p-12 glass-card">
+            <p className="text-sm text-text-secondary">No scripts generated yet for this project.</p>
+          </div>
+        )}
       </div>
     </motion.div>
   )

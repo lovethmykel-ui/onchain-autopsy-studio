@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { API_PROVIDERS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { useSettingsStore } from '@/lib/store/settings'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -21,8 +22,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } },
 }
 
-// Mock configured providers
-const configuredProviders = new Set(['openai', 'elevenlabs', 'flux', 'seedance', 'suno'])
+// Removed static configuredProviders
 
 const categoryIcons: Record<string, string> = {
   LLM: '🧠',
@@ -38,6 +38,17 @@ export default function ApiVaultPage() {
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null)
   const [apiKeyInput, setApiKeyInput] = useState('')
   const [showKey, setShowKey] = useState(false)
+
+  const { apiKeys, setApiKey, removeApiKey } = useSettingsStore()
+  const configuredProviders = new Set(Object.keys(apiKeys))
+
+  const handleSaveKey = () => {
+    if (selectedProvider && apiKeyInput.trim()) {
+      setApiKey(selectedProvider, apiKeyInput.trim())
+      setApiKeyInput('')
+      setShowAddModal(false)
+    }
+  }
 
   const groupedProviders = API_PROVIDERS.reduce((acc, provider) => {
     if (!acc[provider.category]) acc[provider.category] = []
@@ -125,16 +136,20 @@ export default function ApiVaultPage() {
                     <>
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex-1 bg-card-elevated rounded px-2 py-1 border border-border">
-                          <span className="text-[10px] font-mono text-text-muted">••••••••••••sk-4f2a</span>
+                          <span className="text-[10px] font-mono text-text-muted">••••••••••••{apiKeys[provider.id]?.slice(-4)}</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-text-muted">
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" />Validated 2h ago</span>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-1 rounded hover:bg-card-hover cursor-pointer" title="Validate">
-                            <RefreshCw className="w-3 h-3 text-text-muted hover:text-accent" />
-                          </button>
-                          <button className="p-1 rounded hover:bg-card-hover cursor-pointer" title="Delete">
+                          <button 
+                            className="p-1 rounded hover:bg-card-hover cursor-pointer" 
+                            title="Delete"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removeApiKey(provider.id)
+                            }}
+                          >
                             <Trash2 className="w-3 h-3 text-text-muted hover:text-error" />
                           </button>
                         </div>
@@ -209,9 +224,9 @@ export default function ApiVaultPage() {
             </div>
             <div className="flex items-center gap-3 mt-6">
               <Button variant="outline" className="flex-1" onClick={() => setShowAddModal(false)}>Cancel</Button>
-              <Button className="flex-1 gap-2">
+              <Button className="flex-1 gap-2" onClick={handleSaveKey} disabled={!apiKeyInput.trim()}>
                 <Shield className="w-4 h-4" />
-                Encrypt & Save
+                Save Key
               </Button>
             </div>
           </motion.div>
