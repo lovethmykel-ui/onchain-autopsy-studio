@@ -25,19 +25,19 @@
 /* ── TailwindCSS v4 Theme ── */
 @theme {
   /* Colors */
-  --color-background: #050505;
-  --color-surface: #0D0D0D;
-  --color-card: #111111;
-  --color-card-elevated: #161616;
-  --color-card-hover: #1A1A1A;
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-hover: rgba(255, 255, 255, 0.12);
-  --color-border-active: rgba(255, 255, 255, 0.18);
+  --color-background: #020202;
+  --color-surface: #060606;
+  --color-card: rgba(255, 255, 255, 0.015);
+  --color-card-elevated: rgba(255, 255, 255, 0.03);
+  --color-card-hover: rgba(255, 255, 255, 0.04);
+  --color-border: rgba(255, 255, 255, 0.04);
+  --color-border-hover: rgba(255, 255, 255, 0.08);
+  --color-border-active: rgba(255, 255, 255, 0.12);
 
-  --color-accent: #1F6FEB;
-  --color-accent-hover: #388BFD;
-  --color-accent-muted: rgba(31, 111, 235, 0.15);
-  --color-accent-glow: rgba(31, 111, 235, 0.25);
+  --color-accent: #E2E2E2;
+  --color-accent-hover: #FFFFFF;
+  --color-accent-muted: rgba(255, 255, 255, 0.1);
+  --color-accent-glow: rgba(255, 255, 255, 0.15);
 
   --color-success: #10B981;
   --color-success-muted: rgba(16, 185, 129, 0.15);
@@ -146,16 +146,15 @@ body {
 .glass-card {
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   transition: all var(--duration-normal) var(--ease-premium);
 }
 
 .glass-card:hover {
   background: var(--color-card-hover);
   border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-card-hover);
 }
 
 .glass-card-elevated {

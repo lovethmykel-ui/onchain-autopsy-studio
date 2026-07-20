@@ -102,28 +102,28 @@ export default function DashboardPage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex gap-6"
+      className="flex flex-col gap-8"
     >
       {/* Main Content */}
-      <div className="flex-1 min-w-0 space-y-6">
+      <div className="flex-1 min-w-0 space-y-8">
         {/* Row 1: Current Project + System Overview */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Current Project Card */}
-          <motion.div variants={itemVariants} className="xl:col-span-2 glass-card p-5">
-            <div className="flex items-start justify-between mb-1">
+          <motion.div variants={itemVariants} className="xl:col-span-2 glass-card p-8">
+            <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">CURRENT PROJECT</p>
-                <h2 className="text-xl font-bold font-heading text-text-primary tracking-tight mt-1">{displayProject.title}</h2>
+                <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase mb-2">CURRENT PROJECT</p>
+                <h2 className="text-3xl md:text-4xl font-bold font-heading text-text-primary tracking-tight mt-1">{displayProject.title}</h2>
               </div>
-              <Badge variant={displayProject.status === 'In Production' ? 'accent' : 'default'} className="ml-4 shrink-0">
+              <Badge variant={displayProject.status === 'In Production' ? 'accent' : 'default'} className="ml-4 shrink-0 px-3 py-1">
                 {displayProject.status}
               </Badge>
             </div>
             
-            <div className="flex mb-4">
-              <p className="text-sm text-text-secondary line-clamp-2 pr-4">{displayProject.description}</p>
+            <div className="flex flex-col md:flex-row mb-8 gap-6">
+              <p className="text-base text-text-secondary line-clamp-3 md:pr-4 flex-1">{displayProject.description}</p>
               
-              <div className="hidden md:block w-48 h-28 rounded-lg overflow-hidden relative ml-4 shrink-0"
+              <div className="w-full md:w-64 h-36 rounded-xl overflow-hidden relative shrink-0"
                 style={{ background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%)' }}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -139,16 +139,16 @@ export default function DashboardPage() {
             </div>
 
             {/* Progress */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] text-text-muted">Progress</span>
-                <span className="text-xs font-bold text-accent">{displayProject.progress}% Complete</span>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-text-muted uppercase tracking-widest">Production Progress</span>
+                <span className="text-sm font-bold text-accent">{displayProject.progress}%</span>
               </div>
-              <Progress value={displayProject.progress} className="h-2" />
+              <Progress value={displayProject.progress} className="h-1.5" />
             </div>
 
             {/* Meta */}
-            <div className="flex items-center gap-6 text-[11px] text-text-muted">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-xs text-text-muted">
               <div className="flex items-center gap-1.5">
                 <Monitor className="w-3.5 h-3.5" />
                 <span>Type</span>
@@ -173,11 +173,12 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* System Overview */}
-          <motion.div variants={itemVariants} className="glass-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">SYSTEM OVERVIEW</p>
-              <span className="text-[10px] text-accent cursor-pointer hover:underline">View All</span>
-            </div>
+          <motion.div variants={itemVariants} className="glass-card p-8 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase">SYSTEM OVERVIEW</p>
+                <span className="text-xs text-accent cursor-pointer hover:underline">Settings</span>
+              </div>
             <div className="space-y-4">
               <SystemStat
                 icon={<div className="status-dot status-dot-active" />}
@@ -210,14 +211,15 @@ export default function DashboardPage() {
                 <Progress value={24} className="h-1.5" indicatorClassName="bg-gradient-to-r from-warning to-warning" />
               </div>
             </div>
+            </div>
           </motion.div>
         </div>
 
         {/* Row 2: Quick Actions + Recent Projects */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Quick Actions */}
-          <motion.div variants={itemVariants} className="glass-card p-5">
-            <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase mb-4">QUICK ACTIONS</p>
+          <motion.div variants={itemVariants} className="glass-card p-8">
+            <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase mb-6">QUICK ACTIONS</p>
             <div className="grid grid-cols-2 gap-2">
               {WORKFLOW_TYPES.map((wf) => {
                 const Icon = wf.icon
@@ -245,10 +247,10 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Recent Projects */}
-          <motion.div variants={itemVariants} className="xl:col-span-2 glass-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">RECENT PROJECTS</p>
-              <span className="text-[10px] text-accent cursor-pointer hover:underline">View All</span>
+          <motion.div variants={itemVariants} className="xl:col-span-2 glass-card p-8">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase">RECENT PROJECTS</p>
+              <span className="text-xs text-accent cursor-pointer hover:underline">View Library</span>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {recentProjects.map((project) => (
@@ -279,12 +281,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Row 3: Agent Activity + Render Queue + Asset Library */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-8">
           {/* Agent Activity */}
-          <motion.div variants={itemVariants} className="glass-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">AGENT ACTIVITY</p>
-              <span className="text-[10px] text-accent cursor-pointer hover:underline">View All</span>
+          <motion.div variants={itemVariants} className="glass-card p-8">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase">AGENT ACTIVITY</p>
+              <span className="text-xs text-accent cursor-pointer hover:underline">View Matrix</span>
             </div>
             <div className="space-y-3">
               {agentActivity.map((activity, i) => (
@@ -306,10 +308,10 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Render Queue */}
-          <motion.div variants={itemVariants} className="glass-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">RENDER QUEUE</p>
-              <span className="text-[10px] text-accent cursor-pointer hover:underline">View All</span>
+          <motion.div variants={itemVariants} className="glass-card p-8">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase">RENDER QUEUE</p>
+              <span className="text-xs text-accent cursor-pointer hover:underline">View All</span>
             </div>
             <div className="space-y-3">
               {renderJobs.map((job, i) => (
@@ -337,10 +339,10 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Asset Library */}
-          <motion.div variants={itemVariants} className="glass-card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">ASSET LIBRARY</p>
-              <span className="text-[10px] text-accent cursor-pointer hover:underline">View All</span>
+          <motion.div variants={itemVariants} className="glass-card p-8">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase">ASSET LIBRARY</p>
+              <span className="text-xs text-accent cursor-pointer hover:underline">View All</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
               {assetCounts.map((asset) => {
@@ -369,9 +371,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Row 4: Usage & Cost Overview */}
-        <motion.div variants={itemVariants} className="glass-card p-5">
-          <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase mb-4">USAGE & COST OVERVIEW</p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div variants={itemVariants} className="glass-card p-8">
+          <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase mb-6">USAGE & COST OVERVIEW</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             <UsageStat
               icon={<Zap className="w-4 h-4 text-accent" />}
               label="Total Credits"
@@ -407,13 +409,13 @@ export default function DashboardPage() {
       {/* Right Sidebar: Production Pipeline */}
       <motion.div
         variants={itemVariants}
-        className="hidden 2xl:block w-[300px] shrink-0"
+        className="hidden 2xl:block w-[320px] shrink-0"
       >
-        <div className="glass-card p-5 sticky top-[88px]">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-semibold tracking-[0.15em] text-text-muted uppercase">PRODUCTION PIPELINE</p>
+        <div className="glass-card p-8 sticky top-[104px]">
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase">PRODUCTION PIPELINE</p>
           </div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-8">
             <p className="text-sm font-semibold text-text-primary">OneCoin Documentary</p>
             <Badge variant="in-production" className="text-[9px]">In Progress</Badge>
           </div>
