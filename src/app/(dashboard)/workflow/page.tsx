@@ -41,6 +41,7 @@ export default function WorkflowPage() {
   const [documentaryStyle, setDocumentaryStyle] = useState<string>(DOCUMENTARY_STYLES[0])
   const [isLaunching, setIsLaunching] = useState(false)
   const [activeNode, setActiveNode] = useState('script')
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
 
   const router = useRouter()
   const addProject = useAppStore((state) => state.addProject)
@@ -56,6 +57,8 @@ export default function WorkflowPage() {
     }
 
     setIsLaunching(true)
+    const controller = new AbortController()
+    setAbortController(controller)
     
     try {
       const res = await fetch('/api/workflow/start', {
@@ -64,7 +67,8 @@ export default function WorkflowPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${encodeURIComponent(JSON.stringify(apiKeys))}`
         },
-        body: JSON.stringify({ topic, type: projectType, style: documentaryStyle })
+        body: JSON.stringify({ topic, type: projectType, style: documentaryStyle }),
+        signal: controller.signal
       })
       
       const data = await res.json()
@@ -78,14 +82,25 @@ export default function WorkflowPage() {
           status: 'in_production',
           progress: 5
         })
-        router.push('/')
+        router.push('/projects')
       } else {
         toast.error(data.error || 'Failed to launch pipeline.')
       }
-    } catch (error) {
-      toast.error('Network error. Failed to start workflow.')
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        toast.info('Generation cancelled.')
+      } else {
+        toast.error('Network error. Failed to start workflow.')
+      }
     } finally {
       setIsLaunching(false)
+      setAbortController(null)
+    }
+  }
+
+  const handleCancel = () => {
+    if (abortController) {
+      abortController.abort()
     }
   }
 
@@ -216,17 +231,28 @@ export default function WorkflowPage() {
         {/* Bottom Timeline/Status */}
         <div className="h-16 border-t border-border bg-card-elevated/50 flex items-center justify-between px-6">
            <div className="flex items-center gap-3">
-             <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-             <span className="text-xs text-text-secondary font-mono">Engine Idle</span>
+             <div className={cn("w-2 h-2 rounded-full", isLaunching ? "bg-accent animate-pulse" : "bg-success")} />
+             <span className="text-xs text-text-secondary font-mono">{isLaunching ? 'Engine Active' : 'Engine Idle'}</span>
            </div>
            
-           <Button
-              onClick={handleLaunch}
-              disabled={!topic.trim() || !selectedWorkflow || isLaunching}
-              className="gap-2 bg-accent hover:bg-accent-hover text-white shadow-[0_0_20px_rgba(225,29,72,0.3)] transition-all h-9 px-6 rounded-sm text-xs font-bold uppercase tracking-wider"
-            >
-              {isLaunching ? 'Initializing Sequence...' : 'Initialize Generation'}
-            </Button>
+           <div className="flex gap-3">
+             {isLaunching && (
+               <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  className="gap-2 border-accent text-accent hover:bg-accent/10 transition-all h-9 px-6 rounded-sm text-xs font-bold uppercase tracking-wider"
+               >
+                 Cancel
+               </Button>
+             )}
+             <Button
+                onClick={handleLaunch}
+                disabled={!topic.trim() || !selectedWorkflow || isLaunching}
+                className="gap-2 bg-accent hover:bg-accent-hover text-white shadow-[0_0_20px_rgba(225,29,72,0.3)] transition-all h-9 px-6 rounded-sm text-xs font-bold uppercase tracking-wider disabled:opacity-50"
+              >
+                {isLaunching ? 'Processing...' : 'Initialize Generation'}
+              </Button>
+           </div>
         </div>
       </motion.div>
 

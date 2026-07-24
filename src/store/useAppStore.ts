@@ -19,6 +19,7 @@ interface AppState {
   setActiveProject: (id: string) => void
   addProject: (project: Project) => void
   updateProjectProgress: (id: string, progress: number, status?: Project['status']) => void
+  removeProject: (id: string) => void
   
   // UI State
   isCommandPaletteOpen: boolean
@@ -44,6 +45,11 @@ export const useAppStore = create<AppState>()(
             ? { ...p, progress, ...(status ? { status } : {}) }
             : p
         )
+      })),
+
+      removeProject: (id) => set((state) => ({
+        projects: state.projects.filter(p => p.id !== id),
+        activeProjectId: state.activeProjectId === id ? null : state.activeProjectId
       })),
 
       // UI State

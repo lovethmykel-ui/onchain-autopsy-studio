@@ -4,7 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import {
   Plus, Search, Filter, Clock, FolderSearch,
-  Play, MoreHorizontal
+  Play, MoreHorizontal, Trash2
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -45,6 +45,7 @@ const statusVariant = {
 export default function ProjectsPage() {
   const projects = useAppStore(state => state.projects)
   const setActiveProject = useAppStore(state => state.setActiveProject)
+  const removeProject = useAppStore(state => state.removeProject)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const isLoading = false
 
@@ -93,9 +94,24 @@ export default function ProjectsPage() {
                 <h3 className="text-sm font-bold text-white mb-0.5">{project.title}</h3>
                 <p className="text-[10px] text-white/60">Investigation</p>
               </div>
-              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors">
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                <div 
+                  className="w-8 h-8 rounded-full bg-white/10 backdrop-blur flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // If you want to preview
+                  }}
+                >
                   <Play className="w-4 h-4 text-white ml-0.5" />
+                </div>
+                <div 
+                  className="w-8 h-8 rounded-full bg-red-500/20 backdrop-blur flex items-center justify-center cursor-pointer hover:bg-red-500/40 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeProject(project.id)
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 text-red-200" />
                 </div>
               </div>
             </div>
