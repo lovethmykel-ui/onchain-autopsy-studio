@@ -84,7 +84,7 @@ export default function ProjectsPage() {
             key={project.id}
             variants={itemVariants}
             whileHover={{ y: -3 }}
-            onClick={() => setActiveProject(project)}
+            onClick={() => setActiveProject(project.id)}
             className="glass-card overflow-hidden cursor-pointer group hover:border-border-hover transition-all duration-200"
           >
             <div className="h-32 relative" style={{ background: gradients[i % gradients.length] }}>
