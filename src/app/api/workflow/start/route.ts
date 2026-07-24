@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { documentaryApp } from '@/lib/agents/graph'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,14 +35,15 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient()
     const { data: { session } } = await supabase.auth.getSession()
     
-    // In production, require auth:
-    // if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
     // 2. Create a project record in Supabase (if connected)
     let projectId = 'mock-id-' + Date.now()
     if (session) {
-      // Upsert user into public.users to satisfy foreign key constraint
-      await supabase.from('users').upsert({
+      // Upsert user into public.users to satisfy foreign key constraint using service role key
+      const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      await supabaseAdmin.from('users').upsert({
         id: session.user.id,
         email: session.user.email || 'unknown@example.com',
       }, { onConflict: 'id' })

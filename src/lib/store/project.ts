@@ -63,11 +63,16 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         throw new Error('You must be logged in to create a project.')
       }
 
-      // Upsert user into public.users to satisfy foreign key constraint
-      await supabase.from('users').upsert({
-        id: userId,
-        email: authData.user?.email || 'unknown@example.com',
-      }, { onConflict: 'id' })
+      // Call API to sync user into public.users using Service Role Key (bypasses RLS)
+      try {
+        await fetch('/api/auth/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, email: authData.user?.email })
+        })
+      } catch (e) {
+        console.error('Failed to sync user via API:', e)
+      }
 
       const { data, error } = await supabase
         .from('projects')
