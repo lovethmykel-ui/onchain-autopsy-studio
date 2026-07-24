@@ -68,40 +68,57 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Kick off the LangGraph workflow synchronously
-    try {
-      console.log(`Starting graph execution for project: ${projectId}`)
-      const finalState = await documentaryApp.invoke({
-        topic: topic,
-        authHeader: authHeader || '',
-        agentConfigs: agentConfigs || {},
-        status: 'started'
-      })
-      
-      console.log(`Workflow completed for ${topic}. Final status:`, finalState.status)
-      
-      // Update Supabase project status to completed
-      if (session) {
-        await supabase
-          .from('projects')
-          .update({ status: 'completed', progress: 100 })
-          .eq('id', projectId)
-      }
+    // 4. Kick off the LangGraph workflow with streaming
+    const stream = await documentaryApp.stream({
+      topic: topic,
+      authHeader: authHeader || '',
+      agentConfigs: agentConfigs || {},
+      status: 'started'
+    })
+    
+    const encoder = new TextEncoder()
+    const readable = new ReadableStream({
+      async start(controller) {
+        // Send initial connection event with projectId
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'init', projectId })}\n\n`))
+        
+        try {
+          for await (const chunk of stream) {
+            // chunk is usually { [nodeName]: state }
+            const nodeName = Object.keys(chunk)[0]
+            if (nodeName) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'node_update', node: nodeName })}\n\n`))
+            }
+          }
+          
+          // Update Supabase project status to completed
+          if (session) {
+            await supabase
+              .from('projects')
+              .update({ status: 'completed', progress: 100 })
+              .eq('id', projectId)
+          }
 
-      // Return success
-      return NextResponse.json({ 
-        success: true, 
-        projectId,
-        message: 'Production pipeline completed successfully.'
-      })
-
-    } catch (e: any) {
-      console.error(`Workflow failed for ${topic}`, e)
-      if (session) {
-        await supabase.from('projects').update({ status: 'failed' }).eq('id', projectId)
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'complete', projectId })}\n\n`))
+          controller.close()
+        } catch (e: any) {
+          console.error(`Workflow streaming failed for ${topic}`, e)
+          if (session) {
+            await supabase.from('projects').update({ status: 'failed' }).eq('id', projectId)
+          }
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', error: e.message || 'Pipeline execution failed.' })}\n\n`))
+          controller.close()
+        }
       }
-      return NextResponse.json({ error: e.message || 'Pipeline execution failed.' }, { status: 500 })
-    }
+    })
+
+    return new NextResponse(readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+      },
+    })
 
   } catch (error: any) {
     console.error('API Error:', error)

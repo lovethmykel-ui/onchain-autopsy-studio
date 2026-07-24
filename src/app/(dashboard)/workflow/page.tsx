@@ -42,6 +42,7 @@ export default function WorkflowPage() {
   const [isLaunching, setIsLaunching] = useState(false)
   const [activeNode, setActiveNode] = useState('script')
   const [abortController, setAbortController] = useState<AbortController | null>(null)
+  const [logs, setLogs] = useState<string[]>(['System initialized. Waiting for input...'])
 
   const router = useRouter()
   const addProject = useAppStore((state) => state.addProject)
@@ -77,26 +78,81 @@ export default function WorkflowPage() {
         signal: controller.signal
       })
       
-      const data = await res.json()
-      
-      if (res.ok) {
-        toast.success('Production pipeline initialized!')
-        addProject({
-          id: data.projectId,
-          title: topic,
-          topic: topic,
-          status: 'in_production',
-          progress: 5
-        })
-        router.push('/projects')
-      } else {
-        toast.error(data.error || 'Failed to launch pipeline.')
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to launch pipeline.')
       }
+
+      setLogs(prev => [...prev, 'Connection established. Handshake complete.'])
+
+      const reader = res.body?.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n\n')
+          buffer = lines.pop() || ''
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                
+                if (data.type === 'init') {
+                  setLogs(prev => [...prev, `[INIT] Project ID assigned: ${data.projectId}`])
+                  toast.success('Production pipeline initialized!')
+                  addProject({
+                    id: data.projectId,
+                    title: topic,
+                    topic: topic,
+                    status: 'in_production',
+                    progress: 5
+                  })
+                }
+                else if (data.type === 'node_update') {
+                  setLogs(prev => [...prev, `[NODE] >> Executing node: ${data.node}`])
+                  
+                  // Map langgraph nodes back to frontend nodes
+                  const nodeMap: Record<string, string> = {
+                    'researchNode': 'script',
+                    'scriptNode': 'script',
+                    'imageNode': 'visuals',
+                    'audioNode': 'audio',
+                    'renderNode': 'render'
+                  }
+                  if (nodeMap[data.node]) {
+                    setActiveNode(nodeMap[data.node])
+                  }
+                }
+                else if (data.type === 'complete') {
+                  setLogs(prev => [...prev, '[SUCCESS] Workflow completed gracefully.'])
+                  toast.success('Pipeline finished! Redirecting...')
+                  setTimeout(() => router.push('/projects'), 2000)
+                }
+                else if (data.type === 'error') {
+                  setLogs(prev => [...prev, `[ERROR] ${data.error}`])
+                  toast.error(data.error)
+                }
+              } catch (e) {
+                // Ignore parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+      }
+      
     } catch (error: any) {
       if (error.name === 'AbortError') {
+        setLogs(prev => [...prev, '[CANCEL] Generation aborted by user.'])
         toast.info('Generation cancelled.')
       } else {
-        toast.error('Network error. Failed to start workflow.')
+        setLogs(prev => [...prev, `[ERROR] ${error.message || 'Network error.'}`])
+        toast.error(error.message || 'Network error. Failed to start workflow.')
       }
     } finally {
       setIsLaunching(false)
@@ -198,39 +254,69 @@ export default function WorkflowPage() {
         </div>
         
         {/* Node Canvas Area */}
-        <div className="flex-1 bg-[#050505] relative flex items-center justify-center p-8 overflow-hidden" style={{ backgroundImage: 'radial-gradient(#1E1E1E 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+        <div className="flex-1 bg-[#050505] relative flex flex-col overflow-hidden">
           
-          <div className="flex items-center gap-4">
-            {pipelineNodes.map((node, i) => {
-              const Icon = node.icon
-              const isActive = activeNode === node.id
-              return (
-                <React.Fragment key={node.id}>
-                  <div 
-                    onClick={() => setActiveNode(node.id)}
-                    className={cn(
-                      "flex flex-col items-center gap-3 cursor-pointer group transition-all",
-                      isActive ? "scale-110" : "opacity-60 hover:opacity-100 hover:scale-105"
+          {/* Top Canvas */}
+          <div className="h-1/2 flex items-center justify-center p-8 border-b border-border" style={{ backgroundImage: 'radial-gradient(#1E1E1E 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+            <div className="flex items-center gap-4">
+              {pipelineNodes.map((node, i) => {
+                const Icon = node.icon
+                const isActive = activeNode === node.id
+                return (
+                  <React.Fragment key={node.id}>
+                    <div 
+                      onClick={() => setActiveNode(node.id)}
+                      className={cn(
+                        "flex flex-col items-center gap-3 cursor-pointer group transition-all",
+                        isActive ? "scale-110" : "opacity-60 hover:opacity-100 hover:scale-105"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-16 h-16 rounded-2xl flex items-center justify-center border shadow-xl relative z-10",
+                        isActive ? "bg-card-elevated border-accent shadow-[0_0_30px_rgba(225,29,72,0.2)]" : "bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                      )}>
+                        <Icon className={cn("w-6 h-6 transition-colors", isActive ? "text-accent" : "text-text-muted")} />
+                      </div>
+                      <div className={cn("text-[10px] font-bold uppercase tracking-wider font-mono", isActive ? "text-white" : "text-text-muted")}>
+                        {node.label}
+                      </div>
+                    </div>
+                    {i < pipelineNodes.length - 1 && (
+                      <div className="w-12 h-0.5 bg-border relative">
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-border" />
+                      </div>
                     )}
-                  >
-                    <div className={cn(
-                      "w-16 h-16 rounded-2xl flex items-center justify-center border shadow-xl relative z-10",
-                      isActive ? "bg-card-elevated border-accent shadow-[0_0_30px_rgba(225,29,72,0.2)]" : "bg-card border-border shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
-                    )}>
-                      <Icon className={cn("w-6 h-6 transition-colors", isActive ? "text-accent" : "text-text-muted")} />
-                    </div>
-                    <div className={cn("text-[10px] font-bold uppercase tracking-wider font-mono", isActive ? "text-white" : "text-text-muted")}>
-                      {node.label}
-                    </div>
-                  </div>
-                  {i < pipelineNodes.length - 1 && (
-                    <div className="w-12 h-0.5 bg-border relative">
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-border" />
-                    </div>
-                  )}
-                </React.Fragment>
-              )
-            })}
+                  </React.Fragment>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Bottom Terminal */}
+          <div className="h-1/2 bg-[#0A0A0A] p-4 font-mono text-[11px] overflow-y-auto flex flex-col gap-1 relative shadow-inner">
+            <div className="text-text-muted mb-3 flex items-center gap-2 border-b border-border/50 pb-2 sticky top-0 bg-[#0A0A0A]/90 backdrop-blur-sm z-10">
+              <div className={cn("w-2 h-2 rounded-full", isLaunching ? "bg-accent animate-pulse" : "bg-text-muted")} />
+              <span className="font-bold tracking-wider">LIVE TERMINAL OUTPUT</span>
+            </div>
+            
+            <div className="flex-1 space-y-1">
+              {logs.map((log, i) => (
+                <div key={i} className={cn(
+                  "flex items-start gap-3 leading-relaxed",
+                  log.includes('[ERROR]') ? 'text-red-400' : 
+                  log.includes('[SUCCESS]') ? 'text-success' : 
+                  log.includes('[NODE]') ? 'text-accent font-semibold' : 
+                  log.includes('[INIT]') ? 'text-blue-400' : 
+                  'text-text-secondary'
+                )}>
+                  <span className="opacity-50 select-none shrink-0">[{new Date().toLocaleTimeString().split(' ')[0]}]</span>
+                  <span>{log}</span>
+                </div>
+              ))}
+              {isLaunching && (
+                <div className="text-text-muted animate-pulse mt-1 ml-[75px]">_</div>
+              )}
+            </div>
           </div>
         </div>
 
