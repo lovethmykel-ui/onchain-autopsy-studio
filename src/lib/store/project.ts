@@ -65,13 +65,19 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
       // Call API to sync user into public.users using Service Role Key (bypasses RLS)
       try {
-        await fetch('/api/auth/sync', {
+        const res = await fetch('/api/auth/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, email: authData.user?.email })
         })
-      } catch (e) {
+        if (!res.ok) {
+          const errData = await res.json()
+          console.error('Failed to sync user via API:', errData)
+          throw new Error(`Sync API failed: ${errData.error}`)
+        }
+      } catch (e: any) {
         console.error('Failed to sync user via API:', e)
+        throw e // Bubble up so the project creation halts and shows the REAL error
       }
 
       const { data, error } = await supabase
