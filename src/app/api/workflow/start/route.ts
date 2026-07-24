@@ -39,9 +39,13 @@ export async function POST(req: NextRequest) {
     let projectId = 'mock-id-' + Date.now()
     if (session) {
       // Upsert user into public.users to satisfy foreign key constraint using service role key
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error('Server configuration error: SUPABASE_SERVICE_ROLE_KEY is missing in Vercel.')
+      }
+      
       const supabaseAdmin = createSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+        process.env.SUPABASE_SERVICE_ROLE_KEY
       )
       await supabaseAdmin.from('users').upsert({
         id: session.user.id,
@@ -122,6 +126,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('API Error:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
   }
 }
