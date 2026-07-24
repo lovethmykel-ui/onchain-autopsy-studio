@@ -45,39 +45,29 @@ const tabs = [
   { id: 'exports', label: 'Exports', icon: Download, count: 0 },
 ]
 
-const mockImages = Array.from({ length: 18 }, (_, i) => ({
-  id: `img-${i}`,
-  name: ['Character: Ruja Ignatova', 'Location: Sofia Arena', 'Prop: OneCoin Token', 'Location: Server Room', 'Character: Sebastian Greenwood', 'Environment: London Skyline'][i % 6],
-  type: ['character', 'location', 'prop', 'location', 'character', 'environment'][i % 6],
-  model: ['Flux', 'Nano Banana', 'Ideogram', 'Recraft'][i % 4],
-  gradient: gradients[i % gradients.length],
-  created: `${Math.floor(Math.random() * 12) + 1}h ago`,
-}))
-
-const mockAudioItems = Array.from({ length: 8 }, (_, i) => ({
-  id: `audio-${i}`,
-  name: ['Main Narration Track', 'Interview: Mark Scott', 'Suspense Score', 'Investigation Theme', 'Crowd Ambience', 'Keyboard Typing SFX', 'Courtroom Ambience', 'Trading Floor'][i % 8],
-  type: ['narration', 'interview', 'music', 'music', 'sfx', 'sfx', 'sfx', 'sfx'][i % 8],
-  model: ['ElevenLabs', 'Cartesia', 'Suno', 'Udio', 'ElevenLabs SFX', 'ElevenLabs SFX', 'Veo Audio', 'Veo Audio'][i % 8],
-  duration: `${Math.floor(Math.random() * 5) + 1}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
-  created: `${Math.floor(Math.random() * 24) + 1}h ago`,
-}))
-
 export default function AssetLibraryPage() {
   const [activeTab, setActiveTab] = useState('videos')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const { activeProject } = useProjectStore()
-  const { videos, fetchVideos } = useAssetStore()
+  const { videos, images, audio, fetchVideos, fetchImages, fetchAudio } = useAssetStore()
 
   useEffect(() => {
-    if (activeProject) fetchVideos(activeProject.id)
-  }, [activeProject, fetchVideos])
+    if (activeProject) {
+      fetchVideos(activeProject.id)
+      fetchImages(activeProject.id)
+      fetchAudio(activeProject.id)
+    }
+  }, [activeProject, fetchVideos, fetchImages, fetchAudio])
 
   const completedVideos = videos.filter(v => v.status === 'completed')
 
   const dynamicTabs = tabs.map(t => {
     if (t.id === 'videos') return { ...t, count: completedVideos.length }
+    if (t.id === 'images') return { ...t, count: images.length }
+    if (t.id === 'voices') return { ...t, count: audio.filter(a => ['narration', 'interview', 'character'].includes(a.type || '')).length }
+    if (t.id === 'music') return { ...t, count: audio.filter(a => ['music'].includes((a.type as string) || '')).length }
+    if (t.id === 'sfx') return { ...t, count: audio.filter(a => ['sfx'].includes((a.type as string) || '')).length }
     return t
   })
 
@@ -139,7 +129,7 @@ export default function AssetLibraryPage() {
         <motion.div variants={containerVariants} initial="hidden" animate="visible"
           className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3" : "space-y-2"}
         >
-          {mockImages.map((img) => (
+          {images.map((img, i) => (
             viewMode === 'grid' ? (
               <motion.div
                 key={img.id}
@@ -147,22 +137,27 @@ export default function AssetLibraryPage() {
                 whileHover={{ y: -3 }}
                 className="rounded-lg border border-border overflow-hidden cursor-pointer group hover:border-border-hover transition-all duration-200"
               >
-                <div className="aspect-square relative" style={{ background: img.gradient }}>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <button className="p-1 rounded bg-black/40 backdrop-blur hover:bg-black/60 transition-colors cursor-pointer">
+                <div className="aspect-square relative flex items-center justify-center bg-card">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                  {img.url ? (
+                    <img src={img.url} alt={img.prompt} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full" style={{ background: gradients[i % gradients.length] }} />
+                  )}
+                  <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-20">
+                    <button className="p-1 rounded bg-black/40 backdrop-blur hover:bg-black/60 transition-colors cursor-pointer" onClick={() => window.open(img.url || '', '_blank')}>
                       <Eye className="w-3 h-3 text-white" />
                     </button>
-                    <button className="p-1 rounded bg-black/40 backdrop-blur hover:bg-black/60 transition-colors cursor-pointer">
+                    <button className="p-1 rounded bg-black/40 backdrop-blur hover:bg-black/60 transition-colors cursor-pointer" onClick={() => window.open(img.url || '', '_blank')}>
                       <Download className="w-3 h-3 text-white" />
                     </button>
                   </div>
                 </div>
                 <div className="p-2 bg-card-elevated">
-                  <p className="text-[10px] font-medium text-text-primary truncate">{img.name}</p>
+                  <p className="text-[10px] font-medium text-text-primary truncate" title={img.prompt}>{img.prompt}</p>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-[9px] text-text-muted">{img.model}</span>
-                    <span className="text-[9px] text-text-muted">{img.created}</span>
+                    <span className="text-[9px] text-text-muted">{formatDistanceToNow(new Date(img.created_at), { addSuffix: true })}</span>
                   </div>
                 </div>
               </motion.div>
@@ -172,26 +167,39 @@ export default function AssetLibraryPage() {
                 variants={itemVariants}
                 className="glass-card p-3 flex items-center gap-4 cursor-pointer group"
               >
-                <div className="w-12 h-12 rounded-md shrink-0" style={{ background: img.gradient }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-text-primary">{img.name}</p>
-                  <p className="text-[10px] text-text-muted">{img.model} • {img.created}</p>
+                <div className="w-12 h-12 rounded-md shrink-0 overflow-hidden bg-card">
+                  {img.url ? (
+                    <img src={img.url} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full" style={{ background: gradients[i % gradients.length] }} />
+                  )}
                 </div>
-                <Badge variant="accent" className="text-[9px]">{img.type}</Badge>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-text-primary truncate" title={img.prompt}>{img.prompt}</p>
+                  <p className="text-[10px] text-text-muted">{img.model} • {formatDistanceToNow(new Date(img.created_at), { addSuffix: true })}</p>
+                </div>
+                <Badge variant="accent" className="text-[9px]">{img.type || 'image'}</Badge>
               </motion.div>
             )
           ))}
+          {images.length === 0 && (
+            <div className="col-span-full glass-card p-12 flex flex-col items-center justify-center">
+              <Image className="w-10 h-10 text-text-muted mb-3" />
+              <p className="text-sm text-text-secondary mb-1">No images yet.</p>
+              <p className="text-xs text-text-muted">Generate images to see them here.</p>
+            </div>
+          )}
         </motion.div>
       )}
 
       {/* Audio-based tabs */}
       {(['voices', 'music', 'sfx'].includes(activeTab)) && (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-2">
-          {mockAudioItems
+          {audio
             .filter(item => {
-              if (activeTab === 'voices') return ['narration', 'interview'].includes(item.type)
-              if (activeTab === 'music') return item.type === 'music'
-              return item.type === 'sfx'
+              if (activeTab === 'voices') return ['narration', 'interview', 'character', 'quote'].includes(item.type || '')
+              if (activeTab === 'music') return (item.type as string) === 'music'
+              return (item.type as string) === 'sfx'
             })
             .map((item) => (
               <motion.div
@@ -199,21 +207,32 @@ export default function AssetLibraryPage() {
                 variants={itemVariants}
                 className="glass-card p-4 flex items-center gap-4 cursor-pointer group hover:border-border-hover"
               >
-                <div className="w-10 h-10 rounded-lg bg-accent-muted flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-accent-muted flex items-center justify-center shrink-0" onClick={() => item.url && new Audio(item.url).play()}>
                   <Play className="w-4 h-4 text-accent ml-0.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-text-primary">{item.name}</p>
+                  <p className="text-xs font-medium text-text-primary truncate" title={item.transcript || ''}>{item.transcript || 'Audio Asset'}</p>
                   <p className="text-[10px] text-text-muted">{item.model}</p>
                 </div>
-                <span className="text-xs text-text-secondary font-mono">{item.duration}</span>
-                <Badge variant="accent" className="text-[9px]">{item.type}</Badge>
-                <span className="text-[10px] text-text-muted">{item.created}</span>
-                <button className="p-1.5 rounded hover:bg-card-hover transition-colors cursor-pointer opacity-0 group-hover:opacity-100">
+                <span className="text-xs text-text-secondary font-mono">{(item.duration || 0).toFixed(1)}s</span>
+                <Badge variant="accent" className="text-[9px]">{item.type || 'audio'}</Badge>
+                <span className="text-[10px] text-text-muted min-w-[60px] text-right">{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
+                <button className="p-1.5 rounded hover:bg-card-hover transition-colors cursor-pointer opacity-0 group-hover:opacity-100" onClick={() => window.open(item.url || '', '_blank')}>
                   <Download className="w-3.5 h-3.5 text-text-muted" />
                 </button>
               </motion.div>
             ))}
+          {audio.filter(item => {
+            if (activeTab === 'voices') return ['narration', 'interview', 'character', 'quote'].includes(item.type || '')
+            if (activeTab === 'music') return (item.type as string) === 'music'
+            return (item.type as string) === 'sfx'
+          }).length === 0 && (
+            <div className="glass-card p-12 flex flex-col items-center justify-center">
+              {activeTab === 'voices' ? <Mic className="w-10 h-10 text-text-muted mb-3" /> : activeTab === 'music' ? <Music className="w-10 h-10 text-text-muted mb-3" /> : <Volume2 className="w-10 h-10 text-text-muted mb-3" />}
+              <p className="text-sm text-text-secondary mb-1">No {activeTab} yet.</p>
+              <p className="text-xs text-text-muted">Generate {activeTab} to see them here.</p>
+            </div>
+          )}
         </motion.div>
       )}
 

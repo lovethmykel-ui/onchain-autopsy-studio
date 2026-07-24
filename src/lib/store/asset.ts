@@ -5,6 +5,8 @@ import { toast } from 'sonner'
 import { useSettingsStore } from './settings'
 
 type DbVideo = Database['public']['Tables']['generated_videos']['Row']
+type DbImage = Database['public']['Tables']['generated_images']['Row']
+type DbAudio = Database['public']['Tables']['generated_audio']['Row']
 
 export interface VideoAsset extends Omit<DbVideo, 'id' | 'created_at'> {
   id: string
@@ -14,12 +16,19 @@ export interface VideoAsset extends Omit<DbVideo, 'id' | 'created_at'> {
   scene_id?: string
 }
 
+export interface ImageAsset extends DbImage {}
+export interface AudioAsset extends DbAudio {}
+
 interface AssetStore {
   videos: VideoAsset[]
+  images: ImageAsset[]
+  audio: AudioAsset[]
   isLoading: boolean
   error: string | null
   
   fetchVideos: (projectId?: string) => Promise<void>
+  fetchImages: (projectId?: string) => Promise<void>
+  fetchAudio: (projectId?: string) => Promise<void>
   generateVideo: (projectId: string, sceneId: string, prompt: string, model: string) => Promise<void>
   pollProcessingVideos: () => void
 }
@@ -29,6 +38,8 @@ export const useAssetStore = create<AssetStore>((set, get) => {
 
   return {
     videos: [],
+    images: [],
+    audio: [],
     isLoading: false,
     error: null,
 
@@ -59,6 +70,36 @@ export const useAssetStore = create<AssetStore>((set, get) => {
         }
       } catch (err: any) {
         console.error('Error fetching videos:', err)
+        set({ error: err.message, isLoading: false })
+      }
+    },
+
+    fetchImages: async (projectId) => {
+      set({ isLoading: true, error: null })
+      const supabase = createClient()
+      try {
+        let query = supabase.from('generated_images').select('*').order('created_at', { ascending: false })
+        if (projectId) query = query.eq('project_id', projectId)
+        const { data, error } = await query
+        if (error) throw error
+        set({ images: data || [], isLoading: false })
+      } catch (err: any) {
+        console.error('Error fetching images:', err)
+        set({ error: err.message, isLoading: false })
+      }
+    },
+
+    fetchAudio: async (projectId) => {
+      set({ isLoading: true, error: null })
+      const supabase = createClient()
+      try {
+        let query = supabase.from('generated_audio').select('*').order('created_at', { ascending: false })
+        if (projectId) query = query.eq('project_id', projectId)
+        const { data, error } = await query
+        if (error) throw error
+        set({ audio: data || [], isLoading: false })
+      } catch (err: any) {
+        console.error('Error fetching audio:', err)
         set({ error: err.message, isLoading: false })
       }
     },
