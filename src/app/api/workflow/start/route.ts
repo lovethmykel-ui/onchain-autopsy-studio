@@ -10,7 +10,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 })
     }
 
-    // 1. Verify User Session (Optional/Mocked for now)
+    // 1. Validate API keys from the Authorization header
+    const authHeader = req.headers.get('authorization')
+    let hasLLMKey = false
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const keys = JSON.parse(decodeURIComponent(authHeader.split(' ')[1]))
+        if (keys.openai || keys.gemini || keys.claude || keys.openrouter) {
+          hasLLMKey = true
+        }
+      } catch (e) {
+        // Fallback for raw string
+        if (authHeader.split(' ')[1]) hasLLMKey = true
+      }
+    }
+
+    if (!hasLLMKey) {
+      return NextResponse.json({ error: 'No LLM API keys configured. Please add an API key in the API Vault.' }, { status: 401 })
+    }
+
+    // 2. Verify User Session (Optional/Mocked for now)
     const supabase = await createClient()
     const { data: { session } } = await supabase.auth.getSession()
     
@@ -36,40 +56,38 @@ export async function POST(req: NextRequest) {
       if (data) projectId = data.id
     }
 
-    // 3. Kick off the LangGraph background workflow
-    // We execute this asynchronously so the API returns immediately.
-    // In a real production app, this would use Inngest, Trigger.dev, or background workers.
-    ;(async () => {
-      try {
-        console.log(`Starting graph execution for project: ${projectId}`)
-        const finalState = await documentaryApp.invoke({
-          topic: topic,
-          status: 'started'
-        })
-        
-        console.log(`Workflow completed for ${topic}. Final status:`, finalState.status)
-        
-        // Update Supabase project status to completed
-        if (session) {
-          await supabase
-            .from('projects')
-            .update({ status: 'completed', progress: 100 })
-            .eq('id', projectId)
-        }
-      } catch (e) {
-        console.error(`Workflow failed for ${topic}`, e)
-        if (session) {
-          await supabase.from('projects').update({ status: 'failed' }).eq('id', projectId)
-        }
+    // 4. Kick off the LangGraph workflow synchronously
+    try {
+      console.log(`Starting graph execution for project: ${projectId}`)
+      const finalState = await documentaryApp.invoke({
+        topic: topic,
+        status: 'started'
+      })
+      
+      console.log(`Workflow completed for ${topic}. Final status:`, finalState.status)
+      
+      // Update Supabase project status to completed
+      if (session) {
+        await supabase
+          .from('projects')
+          .update({ status: 'completed', progress: 100 })
+          .eq('id', projectId)
       }
-    })()
 
-    // 4. Return the project ID so the UI can redirect/track it
-    return NextResponse.json({ 
-      success: true, 
-      projectId,
-      message: 'Production pipeline launched.'
-    })
+      // Return success
+      return NextResponse.json({ 
+        success: true, 
+        projectId,
+        message: 'Production pipeline completed successfully.'
+      })
+
+    } catch (e: any) {
+      console.error(`Workflow failed for ${topic}`, e)
+      if (session) {
+        await supabase.from('projects').update({ status: 'failed' }).eq('id', projectId)
+      }
+      return NextResponse.json({ error: e.message || 'Pipeline execution failed.' }, { status: 500 })
+    }
 
   } catch (error: any) {
     console.error('API Error:', error)

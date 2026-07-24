@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store/useAppStore'
+import { useSettingsStore } from '@/lib/store/settings'
 import { WORKFLOW_TYPES, AGENTS, PROJECT_TYPES, DOCUMENTARY_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -40,30 +41,42 @@ export default function WorkflowPage() {
 
   const router = useRouter()
   const addProject = useAppStore((state) => state.addProject)
+  const { apiKeys } = useSettingsStore()
 
   const handleLaunch = async () => {
     if (!topic.trim()) return
+
+    // Validate that at least one LLM API key is present
+    const hasLLMKey = apiKeys['openai'] || apiKeys['gemini'] || apiKeys['claude'] || apiKeys['openrouter']
+    if (!hasLLMKey) {
+      toast.error('No LLM API keys configured. Please add an API key in the API Vault first.')
+      return
+    }
+
     setIsLaunching(true)
     
     try {
       const res = await fetch('/api/workflow/start', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${encodeURIComponent(JSON.stringify(apiKeys))}`
+        },
         body: JSON.stringify({ topic, type: projectType, style: documentaryStyle })
       })
       
       const data = await res.json()
       
       if (res.ok) {
-        toast.success('Production pipeline launched successfully!')
+        toast.success('Production pipeline completed successfully!')
         
         // Add to global state so it appears on the dashboard
         addProject({
           id: data.projectId,
           title: topic,
           topic: topic,
-          status: 'in_production',
-          progress: 5
+          status: 'completed',
+          progress: 100
         })
         
         router.push('/')
