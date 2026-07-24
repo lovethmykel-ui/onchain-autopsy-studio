@@ -79,8 +79,16 @@ export default function WorkflowPage() {
       })
       
       if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.error || 'Failed to launch pipeline.')
+        let errorMsg = `HTTP Error ${res.status} ${res.statusText}`
+        try {
+          const errorData = await res.json()
+          errorMsg = errorData.error || errorMsg
+        } catch (e) {
+          const text = await res.text().catch(() => '')
+          console.error('Failed to parse error response:', text)
+          if (res.status === 404) errorMsg = 'API Route Not Found (404)'
+        }
+        throw new Error(errorMsg)
       }
 
       setLogs(prev => [...prev, 'Connection established. Handshake complete.'])

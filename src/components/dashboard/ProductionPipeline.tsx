@@ -21,8 +21,23 @@ const steps = [
   { id: 13, name: 'YouTube Director', status: 'waiting' },
 ]
 
+import { useProjectStore } from '@/lib/store/project'
+
 export default function ProductionPipeline() {
   const router = useRouter()
+  const { activeProject } = useProjectStore()
+
+  // Derive steps based on project progress (mock logic for visual feedback)
+  const progress = activeProject?.progress || 0
+  const isStarted = activeProject?.status === 'in_production' || activeProject?.status === 'completed'
+  const isComplete = activeProject?.status === 'completed'
+
+  const activeStepId = isComplete ? 14 : isStarted ? Math.floor(progress / (100 / 13)) + 1 : 0
+
+  const dynamicSteps = steps.map(step => ({
+    ...step,
+    status: isComplete || step.id < activeStepId ? 'completed' : step.id === activeStepId ? 'active' : 'waiting'
+  }))
 
   return (
     <div className="flex flex-col h-full justify-between p-1">
@@ -33,19 +48,21 @@ export default function ProductionPipeline() {
             PRODUCTION PIPELINE
           </h3>
           <div className="flex items-center justify-between">
-            <div className="text-sm font-bold text-white tracking-tight">
-              OneCoin Documentary
+            <div className="text-sm font-bold text-white tracking-tight truncate max-w-[150px]">
+              {activeProject ? activeProject.title : "No Project Selected"}
             </div>
-            <div className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#10B981] bg-[#10B981]/15 border border-[#10B981]/30 px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-              In Progress
-            </div>
+            {activeProject && (
+              <div className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#10B981] bg-[#10B981]/15 border border-[#10B981]/30 px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                {activeProject.status === 'in_production' && <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />}
+                {activeProject.status === 'completed' ? 'Completed' : 'In Progress'}
+              </div>
+            )}
           </div>
         </div>
 
         {/* 13-Step Vertical Timeline */}
         <div className="flex flex-col space-y-1 mt-3 relative">
-          {steps.map((step) => {
+          {dynamicSteps.map((step) => {
             const isCompleted = step.status === 'completed'
             const isActive = step.status === 'active'
 
