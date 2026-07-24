@@ -9,6 +9,7 @@ export async function getBestAvailableModel(req: Request) {
   let clientAnthropicKey = null
   let clientOpenRouterKey = null
   let clientGithubKey = null
+  let clientNvidiaKey = null
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
@@ -17,9 +18,7 @@ export async function getBestAvailableModel(req: Request) {
       clientAnthropicKey = keys.anthropic
       clientOpenRouterKey = keys.openrouter
       clientGithubKey = keys.github
-      
-      // Nvidia keys
-      if (keys['nvidia-llm']) clientOpenRouterKey = keys['nvidia-llm'] // Can route through OpenRouter if NIM not directly implemented, or set custom NIM URL. Let's just store it for now.
+      clientNvidiaKey = keys['nvidia-llm']
     } catch {
       // Fallback if they just sent a raw string
       clientOpenAiKey = authHeader.split(' ')[1]
@@ -79,6 +78,14 @@ export async function getBestAvailableModel(req: Request) {
       apiKey: clientAnthropicKey,
     })
     return { model: anthropicProxy('claude-3-5-sonnet-20240620'), provider: 'anthropic' }
+  }
+
+  if (clientNvidiaKey) {
+    const nvidia = createOpenAI({
+      baseURL: 'https://integrate.api.nvidia.com/v1',
+      apiKey: clientNvidiaKey,
+    })
+    return { model: nvidia('meta/llama-3.1-70b-instruct'), provider: 'nvidia' }
   }
 
   throw new Error('No API keys configured. Please add an API key in the API Vault settings.')

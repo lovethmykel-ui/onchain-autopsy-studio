@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       console.log(`Starting graph execution for project: ${projectId}`)
       const finalState = await documentaryApp.invoke({
         topic: topic,
+        authHeader: authHeader || '',
         status: 'started'
       })
       
