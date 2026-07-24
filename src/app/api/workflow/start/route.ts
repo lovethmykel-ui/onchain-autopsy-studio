@@ -40,6 +40,12 @@ export async function POST(req: NextRequest) {
     // 2. Create a project record in Supabase (if connected)
     let projectId = 'mock-id-' + Date.now()
     if (session) {
+      // Upsert user into public.users to satisfy foreign key constraint
+      await supabase.from('users').upsert({
+        id: session.user.id,
+        email: session.user.email || 'unknown@example.com',
+      }, { onConflict: 'id' })
+
       const { data, error } = await supabase
         .from('projects')
         .insert({

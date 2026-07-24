@@ -63,6 +63,12 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         throw new Error('You must be logged in to create a project.')
       }
 
+      // Upsert user into public.users to satisfy foreign key constraint
+      await supabase.from('users').upsert({
+        id: userId,
+        email: authData.user?.email || 'unknown@example.com',
+      }, { onConflict: 'id' })
+
       const { data, error } = await supabase
         .from('projects')
         .insert({
