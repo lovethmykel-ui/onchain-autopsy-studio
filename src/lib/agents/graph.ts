@@ -15,6 +15,7 @@ export const GraphState = Annotation.Root({
     reducer: (x, y) => x.concat(y),
     default: () => [],
   }),
+  agentConfigs: Annotation<Record<string, { model?: string, systemPrompt?: string }>>(),
   status: Annotation<string>(),
 })
 
@@ -22,13 +23,16 @@ export const GraphState = Annotation.Root({
 async function researcherNode(state: typeof GraphState.State) {
   console.log(`[Agent] Researching topic: ${state.topic}`)
   
+  const config = state.agentConfigs?.['Lead Researcher'] || {}
+  const systemInstruction = config.systemPrompt || "You are the Lead Researcher for a high-end documentary production. Research the topic and provide a strict list of 3-5 crucial timeline events or facts. Output ONLY a bulleted list."
+
   // Construct a dummy request to pass headers to the fallback logic
   const dummyReq = new Request('http://localhost', { headers: { authorization: state.authHeader } })
-  const { model } = await getBestAvailableModel(dummyReq)
+  const { model } = await getBestAvailableModel(dummyReq, config.model)
 
   const { text } = await generateText({
     model,
-    system: "You are the Lead Researcher for a high-end documentary production. Research the topic and provide a strict list of 3-5 crucial timeline events or facts. Output ONLY a bulleted list.",
+    system: systemInstruction,
     prompt: `Topic: ${state.topic}`,
   })
 
@@ -41,12 +45,15 @@ async function researcherNode(state: typeof GraphState.State) {
 async function scriptwriterNode(state: typeof GraphState.State) {
   console.log(`[Agent] Writing script for: ${state.topic}`)
   
+  const config = state.agentConfigs?.['Scriptwriter'] || {}
+  const systemInstruction = config.systemPrompt || "You are an elite Screenwriter. Turn the research points into a cinematic script with [NARRATION] and [SCENE NOTES]. Keep it under 200 words for this fast prototype."
+
   const dummyReq = new Request('http://localhost', { headers: { authorization: state.authHeader } })
-  const { model } = await getBestAvailableModel(dummyReq)
+  const { model } = await getBestAvailableModel(dummyReq, config.model)
 
   const { text } = await generateText({
     model,
-    system: "You are an elite Screenwriter. Turn the research points into a cinematic script with [NARRATION] and [SCENE NOTES]. Keep it under 200 words for this fast prototype.",
+    system: systemInstruction,
     prompt: `Topic: ${state.topic}\nResearch:\n${state.research.join('\n')}`,
   })
 

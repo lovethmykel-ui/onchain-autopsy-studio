@@ -2,7 +2,7 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function getBestAvailableModel(req: Request) {
+export async function getBestAvailableModel(req: Request, requestedModel?: string) {
   // 1. Get keys from client headers
   const authHeader = req.headers.get('authorization')
   let clientOpenAiKey = null
@@ -48,9 +48,36 @@ export async function getBestAvailableModel(req: Request) {
     if (!clientGithubKey && process.env.GITHUB_TOKEN) clientGithubKey = process.env.GITHUB_TOKEN
   }
 
+  // 3. Resolve requested model if available
+  if (requestedModel) {
+    if (requestedModel.includes('gpt-') || requestedModel.includes('o1-')) {
+      if (clientOpenAiKey) return { model: createOpenAI({ apiKey: clientOpenAiKey })(requestedModel), provider: 'openai' }
+    } else if (requestedModel.includes('claude-')) {
+      if (clientAnthropicKey) {
+        return { 
+          model: createOpenAI({ baseURL: 'https://api.anthropic.com/v1', apiKey: clientAnthropicKey })(requestedModel), 
+          provider: 'anthropic' 
+        }
+      }
+    } else if (requestedModel.includes('gemini-')) {
+       // Assuming gemini uses openai compatible or falls back to something else, not implemented fully in this snippet, but let's just let it fall through or we can add openrouter
+       if (clientOpenRouterKey) {
+          return { model: createOpenAI({ baseURL: 'https://openrouter.ai/api/v1', apiKey: clientOpenRouterKey })(`google/${requestedModel}`), provider: 'openrouter' }
+       }
+    } else if (requestedModel.includes('llama')) {
+       if (clientNvidiaKey) {
+         return { model: createOpenAI({ baseURL: 'https://integrate.api.nvidia.com/v1', apiKey: clientNvidiaKey })(requestedModel), provider: 'nvidia' }
+       }
+       if (clientOpenRouterKey) {
+         return { model: createOpenAI({ baseURL: 'https://openrouter.ai/api/v1', apiKey: clientOpenRouterKey })(`meta-llama/${requestedModel}`), provider: 'openrouter' }
+       }
+    }
+  }
+
+  // 4. Default fallbacks if requestedModel wasn't handled or no specific keys for it
   if (clientOpenAiKey) {
     const openai = createOpenAI({ apiKey: clientOpenAiKey })
-    return { model: openai('gpt-4o'), provider: 'openai' }
+    return { model: openai(requestedModel || 'gpt-4o'), provider: 'openai' }
   }
 
   if (clientOpenRouterKey) {
@@ -58,8 +85,7 @@ export async function getBestAvailableModel(req: Request) {
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey: clientOpenRouterKey,
     })
-    // Use a high-quality free model on OpenRouter as fallback
-    return { model: openrouter('meta-llama/llama-3-8b-instruct:free'), provider: 'openrouter' }
+    return { model: openrouter(requestedModel || 'meta-llama/llama-3-8b-instruct:free'), provider: 'openrouter' }
   }
 
   if (clientGithubKey) {
@@ -67,17 +93,15 @@ export async function getBestAvailableModel(req: Request) {
       baseURL: 'https://models.inference.ai.azure.com',
       apiKey: clientGithubKey,
     })
-    // GitHub Models free tier
-    return { model: github('gpt-4o'), provider: 'github' }
+    return { model: github(requestedModel || 'gpt-4o'), provider: 'github' }
   }
 
   if (clientAnthropicKey) {
-    // We would use @ai-sdk/anthropic here, but mapping to openai compatible API for simplicity
     const anthropicProxy = createOpenAI({
       baseURL: 'https://api.anthropic.com/v1',
       apiKey: clientAnthropicKey,
     })
-    return { model: anthropicProxy('claude-3-5-sonnet-20240620'), provider: 'anthropic' }
+    return { model: anthropicProxy(requestedModel || 'claude-3-5-sonnet-20240620'), provider: 'anthropic' }
   }
 
   if (clientNvidiaKey) {
@@ -85,7 +109,7 @@ export async function getBestAvailableModel(req: Request) {
       baseURL: 'https://integrate.api.nvidia.com/v1',
       apiKey: clientNvidiaKey,
     })
-    return { model: nvidia('meta/llama-3.1-70b-instruct'), provider: 'nvidia' }
+    return { model: nvidia(requestedModel || 'meta/llama-3.1-70b-instruct'), provider: 'nvidia' }
   }
 
   throw new Error('No API keys configured. Please add an API key in the API Vault settings.')

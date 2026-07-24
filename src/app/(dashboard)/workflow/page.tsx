@@ -45,6 +45,7 @@ export default function WorkflowPage() {
 
   const router = useRouter()
   const addProject = useAppStore((state) => state.addProject)
+  const agentConfigs = useAppStore((state) => state.agentConfigs)
   const { apiKeys } = useSettingsStore()
 
   const handleLaunch = async () => {
@@ -67,7 +68,12 @@ export default function WorkflowPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${encodeURIComponent(JSON.stringify(apiKeys))}`
         },
-        body: JSON.stringify({ topic, type: projectType, style: documentaryStyle }),
+        body: JSON.stringify({ 
+          topic, 
+          type: projectType, 
+          style: documentaryStyle,
+          agentConfigs // Pass configurations to backend
+        }),
         signal: controller.signal
       })
       

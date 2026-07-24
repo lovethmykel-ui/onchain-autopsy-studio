@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { topic, type } = await req.json()
+    const { topic, type, agentConfigs } = await req.json()
 
     if (!topic) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 })
@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
       const finalState = await documentaryApp.invoke({
         topic: topic,
         authHeader: authHeader || '',
+        agentConfigs: agentConfigs || {},
         status: 'started'
       })
       
