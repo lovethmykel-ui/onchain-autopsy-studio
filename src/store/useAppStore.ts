@@ -7,6 +7,10 @@ export interface Project {
   topic: string
   status: 'draft' | 'in_production' | 'completed' | 'failed'
   progress: number
+  type?: string
+  workflow_type?: string
+  created_at?: string
+  updated_at?: string
 }
 
 interface AppState {

@@ -105,16 +105,16 @@ export default function ProjectsPage() {
                   {project.status === 'in_production' ? 'In Production' :
                    project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                 </Badge>
-                <Badge variant="default" className="text-[9px]">{project.workflow_type}</Badge>
+                <Badge variant="default" className="text-[9px]">Standard</Badge>
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] text-text-muted">Progress</span>
                 <span className="text-xs font-bold text-accent">{project.progress || 0}%</span>
               </div>
               <Progress value={project.progress || 0} className="h-1.5 mb-3" />
-              <div className="flex items-center justify-between text-[10px] text-text-muted">
-                <span>{new Date(project.created_at).toLocaleDateString()}</span>
-                <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatDistanceToNow(new Date(project.updated_at), { addSuffix: true })}</span>
+              <div className="flex items-center justify-between text-[10px] text-text-muted mt-2">
+                <span>{project.created_at ? new Date(project.created_at).toLocaleDateString() : 'Just now'}</span>
+                <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{project.updated_at ? formatDistanceToNow(new Date(project.updated_at), { addSuffix: true }) : 'Just now'}</span>
               </div>
             </div>
           </motion.div>
