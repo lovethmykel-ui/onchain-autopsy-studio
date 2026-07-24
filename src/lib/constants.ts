@@ -131,7 +131,7 @@ export const AGENTS: AgentDefinition[] = [
     color: '#10B981',
     inputs: ['Storyboard Scenes'],
     outputs: ['Image Prompts', 'Video Prompts'],
-    supportedModels: ['Seedance', 'Veo 3', 'Kling', 'Hailuo', 'Nano Banana', 'Flux', 'Recraft', 'Ideogram'],
+    supportedModels: ['Seedance', 'Veo 3', 'Kling', 'Hailuo', 'Nano Banana', 'Flux', 'Recraft', 'Ideogram', 'NVIDIA NIM (Inkling)'],
     estimatedDuration: '1-3 min',
   },
   {
@@ -143,7 +143,7 @@ export const AGENTS: AgentDefinition[] = [
     color: '#06B6D4',
     inputs: ['Image Prompts'],
     outputs: ['Character Cards', 'Locations', 'Historical Reenactments', 'Props', 'Environments'],
-    supportedModels: ['Nano Banana', 'Flux', 'Ideogram', 'Recraft'],
+    supportedModels: ['Nano Banana', 'Flux', 'Ideogram', 'Recraft', 'NVIDIA NIM (Cosmos)'],
     estimatedDuration: '5-15 min',
   },
   {
@@ -155,7 +155,7 @@ export const AGENTS: AgentDefinition[] = [
     color: '#EF4444',
     inputs: ['Video Prompts', 'Generated Images'],
     outputs: ['B-roll', 'Documentary Footage', 'Reenactments', 'Establishing Shots', 'Transitions'],
-    supportedModels: ['Seedance', 'Veo 3', 'Kling', 'Hailuo', 'Runway', 'Luma'],
+    supportedModels: ['Seedance', 'Veo 3', 'Kling', 'Hailuo', 'Runway', 'Luma', 'NVIDIA NIM (Cosmos)'],
     estimatedDuration: '10-30 min',
   },
   {
@@ -167,7 +167,7 @@ export const AGENTS: AgentDefinition[] = [
     color: '#A855F7',
     inputs: ['Documentary Script'],
     outputs: ['Narration', 'Interview Voices', 'Character Voices', 'Quotes'],
-    supportedModels: ['ElevenLabs', 'Cartesia'],
+    supportedModels: ['ElevenLabs', 'Cartesia', 'NVIDIA NIM (Riva)'],
     estimatedDuration: '3-8 min',
   },
   {
@@ -214,6 +214,7 @@ export const AGENTS: AgentDefinition[] = [
     color: '#22C55E',
     inputs: ['Documentary Draft'],
     outputs: ['Quality Report', 'Improvement Suggestions', 'Overall Score'],
+    supportedModels: ['NVIDIA NIM (Nemotron)'],
     estimatedDuration: '2-5 min',
   },
   {

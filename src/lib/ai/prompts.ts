@@ -115,3 +115,11 @@ export function getStylePrompt(styleName: string): string {
   }
   return ''
 }
+
+export const NVIDIA_NIM_PROMPT = `
+When generating for NVIDIA NIM models, strictly adhere to the following:
+- Inkling (Reasoning): Structure all outputs sequentially with explicit step-by-step logic.
+- Cosmos (Video/Image): Emphasize physical constraints (lighting, gravity, parallax). Provide hyper-detailed prompt descriptions of physics (e.g. "realistic light bounce off metal", "accurate atmospheric fog scattering").
+- Nemotron (QC/Evaluation): Output structural multi-modal analysis separating audio, visual, and narrative layers.
+- Riva (Voice): Specify phonetic pronunciations and precise pacing/pauses.
+`
