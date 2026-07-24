@@ -319,6 +319,7 @@ export const API_PROVIDERS = [
   { id: 'openai', name: 'OpenAI', category: 'LLM', color: '#10A37F' },
   { id: 'gemini', name: 'Google Gemini', category: 'LLM', color: '#4285F4' },
   { id: 'claude', name: 'Claude', category: 'LLM', color: '#D97706' },
+  { id: 'openrouter', name: 'OpenRouter', category: 'LLM', color: '#6366F1' },
   { id: 'nano-banana', name: 'Nano Banana', category: 'Image', color: '#FFD700' },
   { id: 'flux', name: 'Flux', category: 'Image', color: '#7C3AED' },
   { id: 'ideogram', name: 'Ideogram', category: 'Image', color: '#06B6D4' },
