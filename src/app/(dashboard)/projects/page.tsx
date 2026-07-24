@@ -31,7 +31,7 @@ const gradients = [
 ]
 
 import { useEffect, useState } from 'react'
-import { useProjectStore } from '@/lib/store/project'
+import { useAppStore } from '@/store/useAppStore'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -43,12 +43,10 @@ const statusVariant = {
 } as const
 
 export default function ProjectsPage() {
-  const { projects, fetchProjects, isLoading, setActiveProject } = useProjectStore()
+  const projects = useAppStore(state => state.projects)
+  const setActiveProject = useAppStore(state => state.setActiveProject)
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  useEffect(() => {
-    fetchProjects()
-  }, [fetchProjects])
+  const isLoading = false
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">

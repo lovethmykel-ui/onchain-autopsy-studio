@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
         const keys = JSON.parse(decodeURIComponent(authHeader.split(' ')[1]))
-        if (keys.openai || keys.gemini || keys.claude || keys.openrouter) {
+        if (keys.openai || keys.gemini || keys.claude || keys.openrouter || keys['nvidia-llm']) {
           hasLLMKey = true
         }
       } catch (e) {

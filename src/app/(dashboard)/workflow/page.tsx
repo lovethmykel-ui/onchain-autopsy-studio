@@ -47,7 +47,7 @@ export default function WorkflowPage() {
     if (!topic.trim()) return
 
     // Validate that at least one LLM API key is present
-    const hasLLMKey = apiKeys['openai'] || apiKeys['gemini'] || apiKeys['claude'] || apiKeys['openrouter']
+    const hasLLMKey = apiKeys['openai'] || apiKeys['gemini'] || apiKeys['claude'] || apiKeys['openrouter'] || apiKeys['nvidia-llm']
     if (!hasLLMKey) {
       toast.error('No LLM API keys configured. Please add an API key in the API Vault first.')
       return

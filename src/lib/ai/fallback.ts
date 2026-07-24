@@ -17,6 +17,9 @@ export async function getBestAvailableModel(req: Request) {
       clientAnthropicKey = keys.anthropic
       clientOpenRouterKey = keys.openrouter
       clientGithubKey = keys.github
+      
+      // Nvidia keys
+      if (keys['nvidia-llm']) clientOpenRouterKey = keys['nvidia-llm'] // Can route through OpenRouter if NIM not directly implemented, or set custom NIM URL. Let's just store it for now.
     } catch {
       // Fallback if they just sent a raw string
       clientOpenAiKey = authHeader.split(' ')[1]
