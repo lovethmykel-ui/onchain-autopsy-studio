@@ -53,7 +53,11 @@ export async function POST(req: NextRequest) {
         .select('id')
         .single()
         
-      if (data) projectId = data.id
+      if (error) {
+        console.warn('Supabase project insert failed, falling back to mock ID. Error:', error.message)
+      } else if (data) {
+        projectId = data.id
+      }
     }
 
     // 4. Kick off the LangGraph workflow synchronously
