@@ -19,25 +19,25 @@ const itemVariants = {
 }
 
 const agentStatuses = [
-  'completed', 'completed', 'completed', 'completed', 'completed',
-  'completed', 'running', 'waiting', 'waiting', 'waiting',
+  'waiting', 'waiting', 'waiting', 'waiting', 'waiting',
+  'waiting', 'waiting', 'waiting', 'waiting', 'waiting',
   'waiting', 'waiting', 'waiting',
 ]
 
 const agentMetrics = [
-  { tokensUsed: 12400, cost: 0.48, duration: '2m 14s', lastRun: '5 mins ago' },
-  { tokensUsed: 8200, cost: 0.32, duration: '1m 45s', lastRun: '4 mins ago' },
-  { tokensUsed: 24600, cost: 0.96, duration: '5m 30s', lastRun: '4 mins ago' },
-  { tokensUsed: 18400, cost: 0.72, duration: '3m 20s', lastRun: '3 mins ago' },
-  { tokensUsed: 6200, cost: 0.24, duration: '1m 10s', lastRun: '3 mins ago' },
-  { tokensUsed: 0, cost: 42.50, duration: '12m 40s', lastRun: '2 mins ago' },
-  { tokensUsed: 0, cost: 86.20, duration: '—', lastRun: 'Running now' },
-  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Queued' },
-  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Queued' },
-  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Queued' },
-  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Queued' },
-  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Queued' },
-  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Queued' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
+  { tokensUsed: 0, cost: 0, duration: '—', lastRun: 'Never' },
 ]
 
 export default function AgentsPage() {
