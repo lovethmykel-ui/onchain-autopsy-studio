@@ -84,12 +84,12 @@ export default function DashboardPage() {
         {/* Hero Card */}
         <motion.div 
           variants={itemVariants} 
-          className="lg:col-span-2 bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 hover:shadow-[0_0_20px_rgba(225,29,72,0.15)] transition-all duration-300 flex flex-col sm:flex-row overflow-hidden relative shadow-2xl"
+          className="lg:col-span-2 glass-card rounded-xl hover:border-border-active hover:shadow-[0_0_20px_rgba(225,29,72,0.15)] transition-all duration-300 flex flex-col sm:flex-row overflow-hidden relative shadow-2xl"
         >
           {displayProject ? (
             <>
               {/* Left Info Section */}
-              <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between relative z-10 bg-gradient-to-r from-[#0E131F] via-[#0E131F]/95 to-[#0E131F]/60">
+              <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between relative z-10 bg-gradient-to-r from-card via-card/95 to-card/60">
                 <div>
                   <div className="text-[9px] font-bold tracking-[2px] text-text-muted uppercase mb-1.5 font-heading">CURRENT PROJECT</div>
                   <div className="flex items-center gap-2.5 mb-2 flex-wrap">
@@ -133,7 +133,7 @@ export default function DashboardPage() {
 
               {/* Right Poster Banner with Translucent Play Button */}
               <div className="hidden sm:block w-2/5 absolute right-0 top-0 bottom-0 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0E131F] via-[#0E131F]/30 to-transparent z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/30 to-transparent z-10" />
                 <div className="w-full h-full bg-[#161B28] opacity-70 flex items-center justify-center">
                   <Film className="w-12 h-12 text-white/20" />
                 </div>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
         {/* System Overview Telemetry */}
         <motion.div 
           variants={itemVariants} 
-          className="bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 hover:shadow-[0_0_20px_rgba(225,29,72,0.1)] transition-all p-4 sm:p-5 flex flex-col justify-between shadow-xl"
+          className="glass-card rounded-xl hover:border-border-active hover:shadow-[0_0_20px_rgba(225,29,72,0.1)] transition-all p-4 sm:p-5 flex flex-col justify-between shadow-xl"
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-[9px] font-bold tracking-[2px] text-text-muted uppercase font-heading">SYSTEM OVERVIEW</p>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
         {/* Quick Actions (2 cols on mobile) */}
         <motion.div 
           variants={itemVariants} 
-          className="bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 transition-all p-4 sm:p-5 flex flex-col"
+          className="glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 flex flex-col"
         >
           <p className="text-[9px] font-bold tracking-[2px] text-text-muted uppercase mb-3 font-heading">QUICK ACTIONS</p>
           <div className="grid grid-cols-2 gap-2.5 flex-1">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(`/workflow?type=${wf.id}`)}
-                  className="flex flex-col gap-1 p-2.5 rounded-lg bg-[#141C2B] border border-[#1E2638] hover:border-[#E11D48]/50 transition-all text-left group cursor-pointer"
+                  className="flex flex-col gap-1 p-2.5 rounded-lg bg-card-elevated border border-border hover:border-border-active transition-all text-left group cursor-pointer"
                 >
                   <div className="flex items-center gap-1.5 min-w-0">
                     <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: wf.color }} />
@@ -234,7 +234,7 @@ export default function DashboardPage() {
         {/* Recent Projects */}
         <motion.div 
           variants={itemVariants} 
-          className="lg:col-span-2 bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 transition-all p-4 sm:p-5 flex flex-col"
+          className="lg:col-span-2 glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 flex flex-col"
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-[9px] font-bold tracking-[2px] text-text-muted uppercase font-heading">RECENT PROJECTS</p>
@@ -279,7 +279,7 @@ export default function DashboardPage() {
         {/* Agent Activity */}
         <motion.div 
           variants={itemVariants} 
-          className="bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 transition-all p-4 sm:p-5 flex flex-col"
+          className="glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 flex flex-col"
         >
           <div className="glass-card p-4 sm:p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
@@ -325,7 +325,7 @@ export default function DashboardPage() {
         {/* Render Queue */}
         <motion.div 
           variants={itemVariants} 
-          className="bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 transition-all p-4 sm:p-5 flex flex-col"
+          className="glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 flex flex-col"
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-[9px] font-bold tracking-[2px] text-text-muted uppercase font-heading">RENDER QUEUE</p>
@@ -335,7 +335,7 @@ export default function DashboardPage() {
             {renderJobs.length > 0 ? (
               renderJobs.map((job, i) => (
                 <div key={i} onClick={() => router.push('/render-queue')} className="flex gap-2.5 items-center group cursor-pointer">
-                  <div className="w-9 h-9 rounded-lg border border-[#1E2638] overflow-hidden shrink-0">
+                  <div className="w-9 h-9 rounded-lg border border-border overflow-hidden shrink-0">
                     <img src={job.img} alt={job.scene} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -360,7 +360,7 @@ export default function DashboardPage() {
         {/* Asset Library (2 cols on mobile, 3 cols on sm+) */}
         <motion.div 
           variants={itemVariants} 
-          className="bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 transition-all p-4 sm:p-5 flex flex-col"
+          className="glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 flex flex-col"
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-[9px] font-bold tracking-[2px] text-text-muted uppercase font-heading">ASSET LIBRARY</p>
@@ -375,7 +375,7 @@ export default function DashboardPage() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => router.push(asset.tab === 'exports' ? '/exports' : `/asset-library?tab=${asset.tab}`)}
-                  className="bg-[#141C2B] border border-[#1E2638] rounded-lg flex flex-col items-center justify-center p-2.5 cursor-pointer hover:border-[#E11D48]/50 transition-all group"
+                  className="bg-card-elevated border border-border rounded-lg flex flex-col items-center justify-center p-2.5 cursor-pointer hover:border-border-active transition-all group"
                 >
                   <Icon className="w-4 h-4 mb-1 transition-transform group-hover:scale-110" style={{ color: asset.color }} />
                   <p className="text-xs font-black font-mono text-white leading-tight group-hover:text-[#E11D48] transition-colors">{asset.count.toLocaleString()}</p>
@@ -390,7 +390,7 @@ export default function DashboardPage() {
       {/* ROW 4: Usage & Cost Overview (2x2 Grid on Mobile, 4 Cols on Desktop) */}
       <motion.div 
         variants={itemVariants} 
-        className="bg-[#0E131F] rounded-xl border border-[#1E2638] hover:border-[#E11D48]/40 transition-all p-4 sm:p-5 grid grid-cols-2 lg:grid-cols-4 gap-4 shadow-xl"
+        className="glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 grid grid-cols-2 lg:grid-cols-4 gap-4 shadow-xl"
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center shrink-0">

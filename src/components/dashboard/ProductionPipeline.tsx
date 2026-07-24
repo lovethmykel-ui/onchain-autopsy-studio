@@ -57,8 +57,8 @@ export default function ProductionPipeline() {
                   isActive
                     ? 'bg-[#141F36] border border-[#2563EB] shadow-[0_0_15px_rgba(37,99,235,0.25)]'
                     : isCompleted
-                    ? 'bg-[#0E131F]/60 hover:bg-[#141C2B]'
-                    : 'bg-transparent hover:bg-[#0E131F]/40'
+                    ? 'bg-surface hover:bg-card-hover'
+                    : 'bg-transparent hover:bg-surface/50'
                 }`}
               >
                 {/* Step Number Badge & Name */}
@@ -69,7 +69,7 @@ export default function ProductionPipeline() {
                         ? 'bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/40'
                         : isActive
                         ? 'bg-[#2563EB] text-white shadow-[0_0_10px_rgba(37,99,235,0.6)]'
-                        : 'bg-[#141C2B] text-text-muted border border-[#1E2638]'
+                        : 'bg-card-elevated text-text-muted border border-border'
                     }`}
                   >
                     {String(step.id).padStart(2, '0')}
@@ -108,7 +108,7 @@ export default function ProductionPipeline() {
                         ? 'bg-[#10B981] text-black shadow-[0_0_8px_rgba(16,185,129,0.5)]'
                         : isActive
                         ? 'border-2 border-[#3B82F6] bg-transparent'
-                        : 'border border-[#1E2638] bg-transparent'
+                        : 'border border-border bg-transparent'
                     }`}
                   >
                     {isCompleted && <Check className="w-2.5 h-2.5 stroke-[3]" />}

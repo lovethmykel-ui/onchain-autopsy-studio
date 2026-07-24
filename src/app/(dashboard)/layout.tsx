@@ -30,7 +30,7 @@ export default function DashboardLayout({
             </PageTransition>
           </main>
           
-          <aside className="hidden xl:block [grid-area:rightpanel] bg-[#0E131F] border-l border-[#1E2638] p-4 overflow-y-auto">
+          <aside className="hidden xl:block [grid-area:rightpanel] bg-background/90 backdrop-blur-xl border-l border-border p-4 overflow-y-auto">
              <ProductionPipeline />
           </aside>
         </div>

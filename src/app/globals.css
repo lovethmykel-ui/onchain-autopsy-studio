@@ -8,13 +8,13 @@
 
 @theme {
   /* Strict 1M Reference Palette */
-  --color-background: #080B11;
-  --color-surface: #0E131F;
-  --color-card: #0E131F;
-  --color-card-elevated: #141C2B;
-  --color-card-hover: #192438;
-  --color-border: #1E2638;
-  --color-border-hover: #2E3B54;
+  --color-background: #030303;
+  --color-surface: #0A0A0A;
+  --color-card: #0A0A0A;
+  --color-card-elevated: #111111;
+  --color-card-hover: #1A1A1A;
+  --color-border: #1E1E1E;
+  --color-border-hover: #2E2E2E;
   --color-border-active: #E11D48;
 
   /* Glowing Neon Accents */
@@ -38,18 +38,18 @@
   --color-error-muted: rgba(239, 68, 68, 0.15);
 
   --color-text-primary: #FFFFFF;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
-  --color-text-dark: #475569;
+  --color-text-secondary: #A1A1AA;
+  --color-text-muted: #71717A;
+  --color-text-dark: #3F3F46;
 
   /* Glassmorphism Tokens */
-  --color-glass-card: rgba(14, 19, 31, 0.85);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-card: rgba(10, 10, 10, 0.65);
+  --color-glass-border: rgba(255, 255, 255, 0.05);
 
   /* Typography */
-  --font-heading: var(--font-fira-code), 'Fira Code', monospace;
-  --font-body: var(--font-fira-sans), 'Fira Sans', sans-serif;
-  --font-mono: var(--font-fira-code), 'Fira Code', monospace;
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
 }
 
 /* Custom Utilities */

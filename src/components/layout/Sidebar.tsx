@@ -69,7 +69,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="[grid-area:sidebar] bg-[#0E131F] border-r border-[#1E2638] py-5 px-3 overflow-y-auto hidden md:flex flex-col h-full shrink-0">
+    <aside className="[grid-area:sidebar] bg-background/90 backdrop-blur-xl border-r border-border py-5 px-3 overflow-y-auto hidden md:flex flex-col h-full shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
       {/* Brand Logo with exact reference graphic */}
       <Link href="/" className="px-2 pb-6 pt-1">
         <Logo size={36} showText={true} />
@@ -82,11 +82,11 @@ export default function Sidebar() {
           className={cn(
             'flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200 relative',
             isActive('/') 
-              ? 'bg-[#141C2B] text-white border border-[#E11D48]/40 shadow-[0_0_15px_rgba(225,29,72,0.15)] font-semibold' 
-              : 'text-text-secondary hover:bg-[#141C2B]/60 hover:text-white'
+              ? 'bg-card-elevated text-white border border-border-active shadow-[0_0_15px_rgba(225,29,72,0.15)] font-semibold' 
+              : 'text-text-secondary hover:bg-card-elevated/60 hover:text-white'
           )}
         >
-          <div className={cn("w-4 h-4 shrink-0 transition-colors", isActive('/') ? 'text-[#E11D48]' : 'text-text-muted')}>
+          <div className={cn("w-4 h-4 shrink-0 transition-colors", isActive('/') ? 'text-accent' : 'text-text-muted')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           Dashboard
@@ -107,11 +107,11 @@ export default function Sidebar() {
                     className={cn(
                       'flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200 relative',
                       active 
-                        ? 'bg-[#141C2B] text-white border border-[#E11D48]/40 shadow-[0_0_15px_rgba(225,29,72,0.15)] font-semibold' 
-                        : 'text-text-secondary hover:bg-[#141C2B]/60 hover:text-white'
+                        ? 'bg-card-elevated text-white border border-border-active shadow-[0_0_15px_rgba(225,29,72,0.15)] font-semibold' 
+                        : 'text-text-secondary hover:bg-card-elevated/60 hover:text-white'
                     )}
                   >
-                    <div className={cn("w-4 h-4 shrink-0 transition-colors", active ? 'text-[#E11D48]' : 'text-text-muted')}>
+                    <div className={cn("w-4 h-4 shrink-0 transition-colors", active ? 'text-accent' : 'text-text-muted')}>
                       {item.icon}
                     </div>
                     {item.label}
@@ -123,10 +123,10 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-4 pt-4 border-t border-[#1E2638] px-2">
+      <div className="mt-4 pt-4 border-t border-border px-2">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full py-2 px-3 rounded-lg text-xs font-medium text-text-secondary hover:bg-[#141C2B]/60 hover:text-[#E11D48] transition-all duration-200 cursor-pointer"
+          className="flex items-center gap-3 w-full py-2 px-3 rounded-lg text-xs font-medium text-text-secondary hover:bg-card-elevated/60 hover:text-accent transition-all duration-200 cursor-pointer"
         >
           <div className="w-4 h-4 shrink-0 transition-colors">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
