@@ -58,7 +58,6 @@ export const NAV_SECTIONS = [
     title: 'SYSTEM',
     items: [
       { label: 'API Key Vault', href: '/settings/api-vault', icon: KeyRound },
-      { label: 'Usage & Billing', href: '/settings/usage', icon: CreditCard },
       { label: 'Settings', href: '/settings', icon: Settings },
     ],
   },
@@ -245,6 +244,17 @@ export const PROJECT_TYPES = [
 ] as const
 
 export type ProjectType = typeof PROJECT_TYPES[number]
+
+// ── Documentary Styles ──
+export const DOCUMENTARY_STYLES = [
+  'Vox Style (Motion Graphics with Parallax)',
+  'Netflix Style',
+  'Cinematic',
+  'Minimalist Motion Graphics',
+  'Standard Documentary',
+] as const
+
+export type DocumentaryStyle = typeof DOCUMENTARY_STYLES[number]
 
 // ── Workflow Types ──
 export const WORKFLOW_TYPES = [

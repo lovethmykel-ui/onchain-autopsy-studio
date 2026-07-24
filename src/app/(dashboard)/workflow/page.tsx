@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAppStore } from '@/store/useAppStore'
-import { WORKFLOW_TYPES, AGENTS, PROJECT_TYPES } from '@/lib/constants'
+import { WORKFLOW_TYPES, AGENTS, PROJECT_TYPES, DOCUMENTARY_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 const containerVariants = {
@@ -35,6 +35,7 @@ export default function WorkflowPage() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null)
   const [topic, setTopic] = useState('')
   const [projectType, setProjectType] = useState(PROJECT_TYPES[0])
+  const [documentaryStyle, setDocumentaryStyle] = useState(DOCUMENTARY_STYLES[0])
   const [isLaunching, setIsLaunching] = useState(false)
 
   const router = useRouter()
@@ -48,7 +49,7 @@ export default function WorkflowPage() {
       const res = await fetch('/api/workflow/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, type: projectType })
+        body: JSON.stringify({ topic, type: projectType, style: documentaryStyle })
       })
       
       const data = await res.json()
@@ -93,7 +94,7 @@ export default function WorkflowPage() {
           <h2 className="text-base font-semibold text-text-primary">Launch New Production</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
           <div className="lg:col-span-2">
             <label className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1.5 block">Topic / Prompt</label>
             <Input
@@ -112,6 +113,18 @@ export default function WorkflowPage() {
             >
               {PROJECT_TYPES.map(type => (
                 <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1.5 block">Style</label>
+            <select
+              value={documentaryStyle}
+              onChange={(e) => setDocumentaryStyle(e.target.value as typeof documentaryStyle)}
+              className="w-full h-11 rounded-md bg-card border border-border px-3 text-sm text-text-primary focus:outline-none focus:border-accent/50 cursor-pointer"
+            >
+              {DOCUMENTARY_STYLES.map(style => (
+                <option key={style} value={style}>{style}</option>
               ))}
             </select>
           </div>

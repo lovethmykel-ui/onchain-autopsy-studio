@@ -18,7 +18,6 @@ const itemVariants = {
 const settingSections = [
   { title: 'Profile', description: 'Manage your account details and preferences', icon: User, href: '/settings/profile', color: '#1F6FEB' },
   { title: 'API Key Vault', description: 'Encrypted storage for all AI provider API keys', icon: KeyRound, href: '/settings/api-vault', color: '#10B981' },
-  { title: 'Usage & Billing', description: 'Credits, costs, and subscription management', icon: CreditCard, href: '/settings/usage', color: '#F59E0B' },
   { title: 'Notifications', description: 'Configure alerts for renders, agents, and exports', icon: Bell, href: '#', color: '#A855F7' },
   { title: 'Appearance', description: 'Theme, layout, and display preferences', icon: Palette, href: '#', color: '#EC4899' },
   { title: 'Integrations', description: 'YouTube, cloud storage, and third-party services', icon: Globe, href: '#', color: '#06B6D4' },
