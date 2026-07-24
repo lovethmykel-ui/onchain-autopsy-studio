@@ -20,6 +20,9 @@ interface AppState {
   addProject: (project: Project) => void
   updateProjectProgress: (id: string, progress: number, status?: Project['status']) => void
   removeProject: (id: string) => void
+  // Agent Config State
+  agentConfigs: Record<number, { model?: string; systemPrompt?: string }>
+  setAgentConfig: (agentId: number, config: { model?: string; systemPrompt?: string }) => void
   
   // UI State
   isCommandPaletteOpen: boolean
@@ -50,6 +53,18 @@ export const useAppStore = create<AppState>()(
       removeProject: (id) => set((state) => ({
         projects: state.projects.filter(p => p.id !== id),
         activeProjectId: state.activeProjectId === id ? null : state.activeProjectId
+      })),
+
+      // Agent Config State
+      agentConfigs: {},
+      setAgentConfig: (agentId, config) => set((state) => ({
+        agentConfigs: {
+          ...state.agentConfigs,
+          [agentId]: {
+            ...state.agentConfigs[agentId],
+            ...config
+          }
+        }
       })),
 
       // UI State
