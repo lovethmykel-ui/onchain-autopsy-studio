@@ -91,7 +91,7 @@ export default function ProjectsPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-transparent" />
               <div className="absolute bottom-3 left-4 right-4">
                 <h3 className="text-sm font-bold text-white mb-0.5">{project.title}</h3>
-                <p className="text-[10px] text-white/60">{project.type}</p>
+                <p className="text-[10px] text-white/60">Investigation</p>
               </div>
               <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur flex items-center justify-center cursor-pointer hover:bg-white/20 transition-colors">
