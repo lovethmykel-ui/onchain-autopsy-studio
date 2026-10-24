@@ -3,7 +3,8 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Check, Settings } from 'lucide-react'
+import { Check, Settings, Sparkles } from 'lucide-react'
+import { useProjectStore } from '@/lib/store/project'
 
 const steps = [
   { id: 1, name: 'Blockchain Investigator', status: 'completed' },
@@ -21,8 +22,6 @@ const steps = [
   { id: 13, name: 'YouTube Director', status: 'waiting' },
 ]
 
-import { useProjectStore } from '@/lib/store/project'
-
 export default function ProductionPipeline() {
   const router = useRouter()
   const { activeProject } = useProjectStore()
@@ -32,7 +31,7 @@ export default function ProductionPipeline() {
   const isStarted = activeProject?.status === 'in_production' || activeProject?.status === 'completed'
   const isComplete = activeProject?.status === 'completed'
 
-  const activeStepId = isComplete ? 14 : isStarted ? Math.floor(progress / (100 / 13)) + 1 : 0
+  const activeStepId = isComplete ? 14 : isStarted ? Math.floor(progress / (100 / 13)) + 1 : 7
 
   const dynamicSteps = steps.map(step => ({
     ...step,
@@ -43,25 +42,23 @@ export default function ProductionPipeline() {
     <div className="flex flex-col h-full justify-between p-1">
       <div>
         {/* Header */}
-        <div className="mb-4">
-          <h3 className="text-[9px] font-bold tracking-[1.5px] text-text-muted uppercase mb-1 font-heading">
-            PRODUCTION PIPELINE
-          </h3>
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-bold text-white tracking-tight truncate max-w-[150px]">
-              {activeProject ? activeProject.title : "No Project Selected"}
+        <div className="mb-4 pb-3 border-b border-white/[0.06]">
+          <div className="text-[10px] font-mono font-semibold tracking-eyebrow text-zinc-400 uppercase mb-1">
+            Production Pipeline
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm font-semibold text-white tracking-tight-heading truncate">
+              {activeProject ? activeProject.title : "Silk Road Autopsy"}
             </div>
-            {activeProject && (
-              <div className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#10B981] bg-[#10B981]/15 border border-[#10B981]/30 px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                {activeProject.status === 'in_production' && <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />}
-                {activeProject.status === 'completed' ? 'Completed' : 'In Progress'}
-              </div>
-            )}
+            <div className="inline-flex items-center gap-1.5 text-[9px] font-mono font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.15)] shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Step {activeStepId}/13</span>
+            </div>
           </div>
         </div>
 
         {/* 13-Step Vertical Timeline */}
-        <div className="flex flex-col space-y-1 mt-3 relative">
+        <div className="flex flex-col space-y-1.5 mt-2 relative">
           {dynamicSteps.map((step) => {
             const isCompleted = step.status === 'completed'
             const isActive = step.status === 'active'
@@ -70,23 +67,23 @@ export default function ProductionPipeline() {
               <div
                 key={step.id}
                 onClick={() => router.push('/workflow')}
-                className={`flex items-center justify-between p-2 rounded-lg transition-all duration-200 cursor-pointer ${
+                className={`btn-tactile flex items-center justify-between p-2 rounded-xl border transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'bg-[#141F36] border border-[#2563EB] shadow-[0_0_15px_rgba(37,99,235,0.25)]'
+                    ? 'apple-glass bg-accent/10 border-accent/40 shadow-[0_0_20px_rgba(225,29,72,0.2)]'
                     : isCompleted
-                    ? 'bg-surface hover:bg-card-hover'
-                    : 'bg-transparent hover:bg-surface/50'
+                    ? 'bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.05] hover:border-white/[0.08]'
+                    : 'bg-transparent border-transparent hover:bg-white/[0.02] hover:border-white/[0.04]'
                 }`}
               >
                 {/* Step Number Badge & Name */}
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                    className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-mono font-bold shrink-0 ${
                       isCompleted
-                        ? 'bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/40'
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                         : isActive
-                        ? 'bg-[#2563EB] text-white shadow-[0_0_10px_rgba(37,99,235,0.6)]'
-                        : 'bg-card-elevated text-text-muted border border-border'
+                        ? 'bg-accent text-white shadow-[0_0_10px_rgba(225,29,72,0.5)]'
+                        : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
                     }`}
                   >
                     {String(step.id).padStart(2, '0')}
@@ -95,10 +92,10 @@ export default function ProductionPipeline() {
                   <span
                     className={`text-xs truncate ${
                       isActive
-                        ? 'font-bold text-white'
+                        ? 'font-semibold text-white'
                         : isCompleted
-                        ? 'font-medium text-text-primary'
-                        : 'font-normal text-text-muted'
+                        ? 'font-medium text-zinc-300'
+                        : 'font-normal text-zinc-500'
                     }`}
                   >
                     {step.name}
@@ -108,28 +105,28 @@ export default function ProductionPipeline() {
                 {/* Status Indicator */}
                 <div className="flex items-center gap-2 shrink-0 pl-2">
                   <span
-                    className={`text-[10px] font-medium ${
+                    className={`text-[9px] font-mono ${
                       isCompleted
-                        ? 'text-[#10B981]'
+                        ? 'text-emerald-400'
                         : isActive
-                        ? 'text-[#3B82F6]'
-                        : 'text-text-muted'
+                        ? 'text-accent font-semibold'
+                        : 'text-zinc-600'
                     }`}
                   >
-                    {isCompleted ? 'Completed' : isActive ? 'In Progress' : 'Waiting'}
+                    {isCompleted ? 'Done' : isActive ? 'Active' : 'Queue'}
                   </span>
 
                   <div
-                    className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${
                       isCompleted
-                        ? 'bg-[#10B981] text-black shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                         : isActive
-                        ? 'border-2 border-[#3B82F6] bg-transparent'
-                        : 'border border-border bg-transparent'
+                        ? 'border-2 border-accent bg-transparent'
+                        : 'border border-white/10 bg-transparent'
                     }`}
                   >
-                    {isCompleted && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />}
+                    {isCompleted && <Check className="w-2.5 h-2.5 stroke-[2.5]" />}
+                    {isActive && <div className="w-1 h-1 rounded-full bg-accent animate-pulse" />}
                   </div>
                 </div>
               </div>
@@ -139,15 +136,13 @@ export default function ProductionPipeline() {
       </div>
 
       {/* Manage Workflow Button */}
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+      <button
         onClick={() => router.push('/workflow')}
-        className="w-full mt-4 py-2.5 rounded-lg bg-gradient-to-r from-[#1D4ED8] to-[#2563EB] hover:from-[#2563EB] hover:to-[#3B82F6] text-white text-xs font-bold shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+        className="btn-tactile w-full mt-4 py-2.5 rounded-xl apple-glass bg-accent/20 hover:bg-accent/30 border border-accent/40 text-accent hover:text-white text-xs font-semibold shadow-[0_0_20px_rgba(225,29,72,0.2)] transition-all flex items-center justify-center gap-2 cursor-pointer"
       >
-        <Settings className="w-4 h-4" />
-        Manage Workflow
-      </motion.button>
+        <Sparkles className="w-3.5 h-3.5" />
+        <span>Manage Agent Pipeline</span>
+      </button>
     </div>
   )
 }

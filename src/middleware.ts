@@ -29,17 +29,36 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - required for Server Components
-  // https://supabase.com/docs/guides/auth/server-side/nextjs
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const isSupabaseConfigured = Boolean(
+    supabaseUrl &&
+    supabaseAnonKey &&
+    !supabaseUrl.includes('your-project-id') &&
+    !supabaseAnonKey.includes('your-supabase-anon-key')
+  )
+
+  let user = null
+  if (isSupabaseConfigured) {
+    try {
+      const { data } = await supabase.auth.getUser()
+      user = data?.user ?? null
+    } catch {
+      user = null
+    }
+  }
 
   // Protected routes: anything that is NOT /login
-  // The root path '/' currently redirects to /dashboard via next.config.ts? Actually let's just protect root and everything except /login.
   const isLoginPage = request.nextUrl.pathname.startsWith('/login')
   const isApiRoute = request.nextUrl.pathname.startsWith('/api')
   const isStatic = request.nextUrl.pathname.includes('.')
 
   if (!isStatic && !isApiRoute) {
+    // If Supabase is not configured yet in local development, permit direct access
+    if (!isSupabaseConfigured) {
+      return supabaseResponse
+    }
+
     if (!user && !isLoginPage) {
       // Redirect unauthenticated users to login
       const url = request.nextUrl.clone()

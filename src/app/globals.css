@@ -1,27 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ============================================
-   ONCHAIN AUTOPSY STUDIO — Design System
-   Ultra-premium cinematic dark mode & Glassmorphism
-   ============================================ */
+/* ==============================================================================
+   ONCHAIN AUTOPSY STUDIO — Impeccable Design System
+   Apple WWDC Fluid Dynamics + 4-Layer Depth Architecture
+   ============================================================================== */
 
 @theme {
-  /* Strict 1M Reference Palette */
-  --color-background: #030303;
-  --color-surface: #0A0A0A;
-  --color-card: #0A0A0A;
-  --color-card-elevated: #111111;
-  --color-card-hover: #1A1A1A;
-  --color-border: #1E1E1E;
-  --color-border-hover: #2E2E2E;
+  /* Layer 0 & 1 Depth Palette */
+  --color-background: #08090C;
+  --color-surface: rgba(18, 20, 28, 0.75);
+  --color-card: rgba(14, 16, 24, 0.8);
+  --color-card-elevated: rgba(22, 26, 38, 0.88);
+  --color-card-hover: rgba(30, 35, 52, 0.95);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.16);
   --color-border-active: #E11D48;
 
-  /* Glowing Neon Accents */
+  /* Glowing Cinematic Accents */
   --color-accent: #E11D48;
-  --color-accent-hover: #EF4444;
+  --color-accent-hover: #F43F5E;
   --color-accent-muted: rgba(225, 29, 72, 0.15);
   
+  --color-cyan: #06B6D4;
+  --color-cyan-muted: rgba(6, 182, 212, 0.15);
+
   --color-purple: #8B5CF6;
   --color-purple-muted: rgba(139, 92, 246, 0.15);
   
@@ -31,88 +34,127 @@
   --color-warning: #F59E0B;
   --color-warning-muted: rgba(245, 158, 11, 0.15);
   
-  --color-orange: #F97316;
-  --color-orange-muted: rgba(249, 115, 22, 0.15);
-  
   --color-error: #EF4444;
   --color-error-muted: rgba(239, 68, 68, 0.15);
 
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #A1A1AA;
-  --color-text-muted: #71717A;
+  /* Calibrated Typography Opacity */
+  --color-text-primary: rgba(255, 255, 255, 0.96);
+  --color-text-secondary: rgba(255, 255, 255, 0.65);
+  --color-text-muted: rgba(255, 255, 255, 0.42);
   --color-text-dark: #3F3F46;
 
-  /* Glassmorphism Tokens */
-  --color-glass-card: rgba(10, 10, 10, 0.65);
-  --color-glass-border: rgba(255, 255, 255, 0.05);
+  /* Glassmorphic Tokens */
+  --color-glass-card: rgba(14, 16, 24, 0.72);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
 
   /* Typography */
-  --font-heading: 'Inter', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'Fira Code', monospace;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, monospace;
 }
 
-/* Custom Utilities */
+/* ── Typography & Optical Tracking ── */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+/* ── Apple & Impeccable Custom Utilities ── */
 @layer utilities {
   .glass-card {
     background-color: var(--color-glass-card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
     border: 1px solid var(--color-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-surface {
+    background-color: var(--color-surface);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.5);
+  }
+
+  .apple-glass {
+    background: rgba(14, 16, 24, 0.68);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Tactile Press Dynamics (Apple Design Spring Physics) */
+  .btn-tactile {
+    transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+    will-change: transform;
+  }
+  .btn-tactile:active {
+    transform: scale(0.97);
+  }
+  .btn-tactile-sm:active {
+    transform: scale(0.98);
+  }
+
+  /* Apple-style Segmented Control Container */
+  .segmented-control {
+    background: rgba(0, 0, 0, 0.45);
+    padding: 3px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* Subtle Noise Texture Overlay */
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.024;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
   .glow-accent {
-    box-shadow: 0 0 20px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 0 25px rgba(225, 29, 72, 0.25);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.22);
   }
 
   .glow-success {
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.22);
   }
 
-  .glow-purple {
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+  /* Micro-Typography Tracking */
+  .tracking-eyebrow {
+    letter-spacing: 0.08em;
+  }
+  .tracking-tight-heading {
+    letter-spacing: -0.028em;
   }
 
-  /* Custom Scrollbars */
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
+  /* Custom Sleek Scrollbars */
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #080B11;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1E2638;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #2E3B54;
+    background: rgba(255, 255, 255, 0.22);
   }
-}
-
-/* Keyframe Animations */
-@keyframes spinRing {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
-}
-
-.animate-spinRing {
-  animation: spinRing 2s linear infinite;
-}
-
-.animate-pulseGlow {
-  animation: pulseGlow 2s ease-in-out infinite;
 }

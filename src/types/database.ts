@@ -78,6 +78,50 @@ export interface Script {
   updated_at: string
 }
 
+// ── Higgsfield Virtual Camera & Optical Physics ──
+export type CameraBodyId = 'arri_alexa_35' | 'red_vraptor_8k' | 'imax_70mm' | 'sony_venice_2' | 'panavision_dxl2' | 'bolex_16mm'
+export type LensOpticId = 'cooke_s4' | 'panavision_anamorphic' | 'zeiss_master' | 'master_macro_100' | 'angenieux_optimo'
+export type AspectRatioId = '2.39:1' | '16:9' | '9:16' | '4:3' | '1.43:1'
+export type ColorLutId = 'arri_logc4' | 'kodak_vision3' | 'bleach_bypass' | 'fincher_green' | 'forensic_uv'
+
+export interface CameraBody {
+  id: CameraBodyId
+  name: string
+  sensor: string
+  dynamicRange: string
+  nativeIso: number
+  description: string
+}
+
+export interface LensOptic {
+  id: LensOpticId
+  name: string
+  type: 'Anamorphic' | 'Prime Cine' | 'Macro' | 'Cine Zoom'
+  squeezeFactor: number
+  bokehCharacter: string
+}
+
+export interface CameraTrajectory {
+  id: string
+  name: string
+  category: 'Cinematic Orbit' | 'Dolly & Push' | 'FPV & Drone' | 'Handheld & Staccato' | 'Forensic Crane'
+  description: string
+  vector: { x: number; y: number; z: number; pitch: number; yaw: number; roll: number }
+  speedMultiplier: number
+}
+
+export interface ActorProfile {
+  id: string
+  name: string
+  role: 'Suspect / Founder' | 'Forensic Agent' | 'Whistleblower' | 'Exploit Hacker' | 'Victim Investor'
+  avatarUrl?: string
+  seedId: number
+  faceEmbeddingPrompt: string
+  wardrobe: string
+  keyVisualFeatures: string
+  lightingProfile: string
+}
+
 export interface Storyboard {
   id: string
   project_id: string
@@ -89,14 +133,29 @@ export interface Storyboard {
 
 export interface StoryboardScene {
   scene_number: number
+  title?: string
   shot_type: string
   camera_movement: string
   lighting: string
   location: string
   mood: string
   visual_description: string
+  narration_excerpt?: string
   prompt?: string
   duration: number
+  // Higgsfield Cinema Optical Rig
+  camera_body?: CameraBodyId
+  lens?: LensOpticId
+  focal_length?: number // e.g. 18, 24, 35, 50, 85, 135, 200
+  aperture?: string // e.g. 'f/1.4', 'f/2.8', 'f/5.6'
+  shutter_angle?: number // e.g. 180, 90, 45, 360
+  aspect_ratio?: AspectRatioId
+  color_lut?: ColorLutId
+  trajectory_preset?: string
+  actor_ids?: string[]
+  hud_overlay?: string
+  onchain_tx_hash?: string
+  video_url?: string
 }
 
 export interface GeneratedImage {

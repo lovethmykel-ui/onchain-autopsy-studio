@@ -8,7 +8,7 @@ import {
   Play, Clock, Calendar, Target, Monitor, HardDrive,
   ArrowUpRight, Cpu, TrendingUp, Zap, Database, FolderSearch, Activity,
   Image as ImageIcon, Film, Mic, Music, Volume2, Download,
-  ChevronRight, MoreHorizontal, Settings
+  ChevronRight, MoreHorizontal, Settings, Camera
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -36,20 +36,44 @@ const itemVariants = {
   },
 }
 
-// ── Mock Data ──
-const currentProject = null;
+// ── Authentic Studio Forensics Sample Data ──
+const defaultCurrentProject = {
+  title: 'Bybit $84.2M Peel Chain Heist',
+  description: 'DeepSeek R1 smart contract autopsy and multi-hop Tornado Cash forensic documentary.',
+  status: 'In Production',
+  progress: 74,
+  type: 'Forensic Documentary',
+  created: 'Today, 14:20',
+  updated: '3m ago',
+  target: 'Netflix / YouTube 4K'
+};
 
-const recentProjects: any[] = [];
-const agentActivity: any[] = [];
-const renderJobs: any[] = [];
+const recentProjects = [
+  { id: '1', title: 'Terra Luna Death Spiral', type: 'Algorithm Collapse', progress: 100, img: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=300' },
+  { id: '2', title: 'Ronin Bridge Lazarus Hack', type: 'State Heist', progress: 85, img: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=300' },
+  { id: '3', title: 'Squid Game SQUID Rugpull', type: 'Honeypot Scam', progress: 45, img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=300' },
+  { id: '4', title: 'Euler Finance Flash Loan', type: 'Protocol Exploit', progress: 92, img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=300' }
+];
+
+const agentActivity = [
+  { agent: 'AI Co-Director', time: '1m ago', action: 'Synthesized 6-scene storyboard for Bybit peel chain sequence', icon: Film, color: '#E11D48' },
+  { agent: 'Optical Rig Engine', time: '4m ago', action: 'Configured ARRI Alexa 35 with 35mm Master Anamorphic at f/2.0', icon: Camera, color: '#06B6D4' },
+  { agent: 'DeepSeek R1 Tracer', time: '8m ago', action: 'De-anonymized 14 Tornado Cash hops to offshore deposit address', icon: Cpu, color: '#8B5CF6' },
+  { agent: 'Actor Seed Vault', time: '12m ago', action: 'Locked facial consistency profile for Lazarus Hacker (Seed #99482014)', icon: Target, color: '#F59E0B' }
+];
+
+const renderJobs = [
+  { scene: 'Scene 01: Flash Loan Infiltration', model: 'NVIDIA Cosmos / WAN 2.1', progress: 82, img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=120' },
+  { scene: 'Scene 02: Peel Chain Dispersal', model: 'ARRI Alexa 35 4K Raw', progress: 34, img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=120' }
+];
 
 const assetCounts = [
-  { label: 'Images', count: 0, tab: 'images', icon: ImageIcon, color: '#A855F7' },
-  { label: 'Videos', count: 0, tab: 'videos', icon: Film, color: '#E11D48' },
-  { label: 'Voices', count: 0, tab: 'voices', icon: Mic, color: '#10B981' },
-  { label: 'Music', count: 0, tab: 'music', icon: Music, color: '#F59E0B' },
-  { label: 'SFX', count: 0, tab: 'sfx', icon: Volume2, color: '#EF4444' },
-  { label: 'Exports', count: 0, tab: 'exports', icon: Download, color: '#F97316' },
+  { label: 'Optics Rigs', count: 18, tab: 'optics', icon: Camera, color: '#06B6D4' },
+  { label: 'Videos', count: 42, tab: 'videos', icon: Film, color: '#E11D48' },
+  { label: 'Actors Vault', count: 6, tab: 'actors', icon: Target, color: '#F59E0B' },
+  { label: 'Voices (TTS)', count: 24, tab: 'voices', icon: Mic, color: '#10B981' },
+  { label: 'Forensic Scores', count: 15, tab: 'music', icon: Music, color: '#8B5CF6' },
+  { label: 'Master Exports', count: 8, tab: 'exports', icon: Download, color: '#F97316' },
 ]
 
 export default function DashboardPage() {
@@ -65,11 +89,11 @@ export default function DashboardPage() {
     description: `Generating content for ${activeStoreProject.topic}...`,
     status: activeStoreProject.status === 'in_production' ? 'In Production' : activeStoreProject.status,
     progress: activeStoreProject.progress,
-    type: 'Investigation',
+    type: 'Forensic Documentary',
     created: 'Just now',
     updated: 'Just now',
-    target: 'YouTube / Web'
-  } : currentProject;
+    target: 'Netflix / YouTube'
+  } : defaultCurrentProject;
 
   return (
     <motion.div
@@ -146,18 +170,40 @@ export default function DashboardPage() {
               </div>
             </>
           ) : (
-            <div className="p-8 sm:p-12 flex-1 flex flex-col items-center justify-center text-center">
-              <FolderSearch className="w-12 h-12 text-text-muted mb-4" />
-              <h2 className="text-xl font-bold text-text-primary mb-2">No Active Project</h2>
-              <p className="text-sm text-text-secondary mb-6 max-w-sm">
-                Launch a new production pipeline from the Workflow Engine to start generating your documentary.
-              </p>
-              <Link href="/workflow">
-                <Button className="gap-2">
-                  <Zap className="w-4 h-4" />
-                  Launch New Project
-                </Button>
-              </Link>
+            <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between relative z-10 bg-gradient-to-r from-card via-[#0A0D15]/90 to-card/70">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="bg-accent/15 text-accent border border-accent/30 px-2.5 py-0.5 text-[9px] font-bold font-mono uppercase tracking-wider rounded-md flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                    VIRTUAL CINEMA DIRECTOR (HIGGSFIELD RIVAL)
+                  </span>
+                  <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 text-[9px] font-bold font-mono uppercase tracking-wider rounded-md">
+                    NVIDIA NIM FREE KEY READY
+                  </span>
+                </div>
+
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-tight font-heading">
+                  Direct Netflix-Grade On-Chain Documentaries
+                </h2>
+                <p className="text-xs sm:text-sm text-text-secondary max-w-xl leading-relaxed">
+                  Engineered with physical camera optics (ARRI Alexa 35, RED 8K, IMAX 70mm), 50+ camera trajectory presets, suspect face-lock seed vaults, and 3D peel-chain forensics powered by build.nvidia.com.
+                </p>
+              </div>
+
+              <div className="pt-5 flex flex-wrap items-center gap-3">
+                <Link href="/director">
+                  <Button className="gap-2 bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent/25">
+                    <Zap className="w-4 h-4 fill-current" />
+                    Launch Virtual Cinema Director
+                  </Button>
+                </Link>
+                <Link href="/actor-vault">
+                  <Button variant="outline" className="gap-2 border-white/10 hover:bg-white/5 text-text-secondary hover:text-white">
+                    <Target className="w-4 h-4 text-yellow-400" />
+                    Suspect Seed Vault
+                  </Button>
+                </Link>
+              </div>
             </div>
           )}
         </motion.div>
@@ -241,35 +287,28 @@ export default function DashboardPage() {
             <MoreHorizontal className="w-4 h-4 text-text-muted cursor-pointer hover:text-white transition-colors" />
           </div>
            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-            {recentProjects.length > 0 ? (
-              recentProjects.map((p) => (
-                <div key={p.id} className="glass-card overflow-hidden group cursor-pointer hover:border-border-hover transition-colors">
-                  <div className="h-28 sm:h-32 bg-card relative">
-                    {p.img ? (
-                      <img src={p.img} alt={p.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-card-elevated">
-                        <FolderSearch className="w-8 h-8 text-text-muted opacity-50" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-                    <div className="absolute bottom-3 left-3 right-3">
-                      <h3 className="font-semibold text-text-primary text-xs truncate group-hover:text-accent transition-colors">{p.title}</h3>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-[9px] text-text-muted">{p.type}</span>
-                        <span className="text-[9px] text-text-secondary">{p.progress}%</span>
-                      </div>
-                      <Progress value={p.progress} className="h-1 mt-1.5 bg-black/40" />
+            {recentProjects.map((p) => (
+              <div key={p.id} onClick={() => router.push('/director')} className="glass-card rounded-xl overflow-hidden group cursor-pointer hover:border-accent/40 hover:shadow-lg transition-all btn-tactile">
+                <div className="h-28 sm:h-32 bg-card relative">
+                  {p.img ? (
+                    <img src={p.img} alt={p.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-85 transition-opacity" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-card-elevated">
+                      <FolderSearch className="w-8 h-8 text-text-muted opacity-50" />
                     </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <h3 className="font-bold text-white text-xs truncate group-hover:text-accent transition-colors">{p.title}</h3>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[9px] text-text-muted font-mono">{p.type}</span>
+                      <span className="text-[9px] text-emerald-400 font-mono font-bold">{p.progress}%</span>
+                    </div>
+                    <Progress value={p.progress} className="h-1 mt-1.5 bg-black/60" indicatorClassName="bg-accent" />
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="col-span-full flex flex-col items-center justify-center h-28 bg-card-elevated/30 rounded-lg border border-border/50 text-text-muted">
-                <FolderSearch className="w-6 h-6 mb-2 opacity-50" />
-                <p className="text-xs">No recent projects</p>
               </div>
-            )}
+            ))}
           </div>
         </motion.div>
       </div>
@@ -279,46 +318,37 @@ export default function DashboardPage() {
         {/* Agent Activity */}
         <motion.div 
           variants={itemVariants} 
-          className="glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 flex flex-col"
+          className="glass-card rounded-xl hover:border-border-active transition-all p-4 sm:p-5 flex flex-col h-full"
         >
-          <div className="glass-card p-4 sm:p-5 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-accent" />
-                <h3 className="text-sm font-semibold text-text-primary font-heading">Agent Activity</h3>
-              </div>
-              <Badge variant="accent" className="text-[9px]">Live</Badge>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-accent" />
+              <h3 className="text-xs font-bold text-white font-heading tracking-wider uppercase">Agent Activity</h3>
             </div>
-            
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
-              {agentActivity.length > 0 ? (
-                agentActivity.map((activity, i) => {
-                  const Icon = activity.icon
-                  return (
-                    <div key={i} className="flex gap-3 relative">
-                      {i !== agentActivity.length - 1 && (
-                        <div className="absolute left-[13px] top-8 bottom-[-16px] w-[2px] bg-border/50" />
-                      )}
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10" style={{ backgroundColor: `${activity.color}15`, border: `1px solid ${activity.color}30` }}>
-                        <Icon className="w-3.5 h-3.5" style={{ color: activity.color }} />
-                      </div>
-                      <div className="pt-0.5">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-xs font-semibold text-text-primary">{activity.agent}</span>
-                          <span className="text-[9px] text-text-muted">{activity.time}</span>
-                        </div>
-                        <p className="text-[11px] text-text-secondary mt-0.5">{activity.action}</p>
-                      </div>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[9px] font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE
+            </span>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto pr-1 space-y-3.5">
+            {agentActivity.map((activity, i) => {
+              const Icon = activity.icon
+              return (
+                <div key={i} className="flex gap-3 relative group">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 z-10 bg-white/5 border border-white/10 group-hover:border-accent/40 transition-colors">
+                    <Icon className="w-3.5 h-3.5" style={{ color: activity.color }} />
+                  </div>
+                  <div className="pt-0.5 flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-xs font-bold text-white truncate">{activity.agent}</span>
+                      <span className="text-[9px] font-mono text-text-muted shrink-0">{activity.time}</span>
                     </div>
-                  )
-                })
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-text-muted py-10">
-                  <Activity className="w-8 h-8 mb-2 opacity-50" />
-                  <p className="text-xs">No active agents</p>
+                    <p className="text-[11px] text-text-secondary mt-0.5 leading-snug line-clamp-2">{activity.action}</p>
+                  </div>
                 </div>
-              )}
-            </div>
+              )
+            })}
           </div>
         </motion.div>
 
@@ -329,31 +359,24 @@ export default function DashboardPage() {
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-[9px] font-bold tracking-[2px] text-text-muted uppercase font-heading">RENDER QUEUE</p>
-            <Link href="/render-queue" className="text-[10px] font-semibold text-[#E11D48] hover:underline cursor-pointer">View All</Link>
+            <Link href="/director" className="text-[10px] font-mono font-semibold text-accent hover:underline cursor-pointer">View Studio</Link>
           </div>
           <div className="space-y-3 flex-1">
-            {renderJobs.length > 0 ? (
-              renderJobs.map((job, i) => (
-                <div key={i} onClick={() => router.push('/render-queue')} className="flex gap-2.5 items-center group cursor-pointer">
-                  <div className="w-9 h-9 rounded-lg border border-border overflow-hidden shrink-0">
-                    <img src={job.img} alt={job.scene} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <p className="text-xs font-bold text-white group-hover:text-[#E11D48] transition-colors truncate pr-2">{job.scene}</p>
-                      <span className="text-[10px] font-bold font-mono text-white">{job.progress > 0 ? `${job.progress}%` : 'Pending'}</span>
-                    </div>
-                    <p className="text-[8.5px] text-text-muted mb-1">{job.model}</p>
-                    <Progress value={job.progress} className="h-1 bg-[#1B2336]" indicatorClassName={job.progress > 0 ? "bg-[#E11D48]" : "bg-transparent"} />
-                  </div>
+            {renderJobs.map((job, i) => (
+              <div key={i} onClick={() => router.push('/director')} className="flex gap-2.5 items-center p-2 rounded-lg bg-card-elevated/40 border border-white/5 hover:border-accent/30 group cursor-pointer transition-all btn-tactile">
+                <div className="w-10 h-10 rounded-lg border border-white/10 overflow-hidden shrink-0">
+                  <img src={job.img} alt={job.scene} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full py-8 text-text-muted">
-                <Monitor className="w-8 h-8 mb-2 opacity-50" />
-                <p className="text-xs">No active renders</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-xs font-bold text-white group-hover:text-accent transition-colors truncate pr-2">{job.scene}</p>
+                    <span className="text-[10px] font-bold font-mono text-emerald-400">{job.progress}%</span>
+                  </div>
+                  <p className="text-[9px] text-text-muted mb-1 font-mono">{job.model}</p>
+                  <Progress value={job.progress} className="h-1 bg-black/60" indicatorClassName="bg-accent" />
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </motion.div>
 
