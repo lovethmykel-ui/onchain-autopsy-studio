@@ -29,17 +29,21 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  const demoCookie = request.cookies.get('operator-auth')?.value
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const isSupabaseConfigured = Boolean(
     supabaseUrl &&
     supabaseAnonKey &&
     !supabaseUrl.includes('your-project-id') &&
-    !supabaseAnonKey.includes('your-supabase-anon-key')
+    !supabaseAnonKey.includes('your-supabase-anon-key') &&
+    !supabaseUrl.includes('mxjbdkkrvzrmnmxbasmq') // expired/deleted project URL
   )
 
   let user = null
-  if (isSupabaseConfigured) {
+  if (demoCookie === 'active') {
+    user = { id: 'demo-operator-id', email: 'operator@onchain-autopsy.com' }
+  } else if (isSupabaseConfigured) {
     try {
       const { data } = await supabase.auth.getUser()
       user = data?.user ?? null
@@ -54,7 +58,7 @@ export async function middleware(request: NextRequest) {
   const isStatic = request.nextUrl.pathname.includes('.')
 
   if (!isStatic && !isApiRoute) {
-    // If Supabase is not configured yet in local development, permit direct access
+    // If Supabase is not configured yet, permit direct access
     if (!isSupabaseConfigured) {
       return supabaseResponse
     }
